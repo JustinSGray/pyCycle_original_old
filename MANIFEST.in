@@ -1,0 +1,3 @@
+graft src/pycycle/sphinx_build/html
+recursive-include src/pycycle/test *.py
+

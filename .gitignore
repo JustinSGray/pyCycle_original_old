@@ -1,0 +1,4 @@
+*.log
+*.pyc
+*.xml
+openmdao_log.txt
