@@ -23,21 +23,4 @@ class FlowStart(Component):
 
 
 
-if __name__ == "__main__": 
-    from openmdao.main.api import set_as_top
-
-    c = set_as_top(FlowStart())
-
-    print c.Fl_O.Pt
-    print c.Fl_O.rhot
-    print c.Fl_O.area
-    print 
-    print 
-    c.run()
-
-    print c.Fl_O.Pt
-    print c.Fl_O.rhot
-    print c.Fl_O.area
-
-
 
