@@ -3,26 +3,26 @@ import unittest
 
 from openmdao.main.api import set_as_top
 
-from hyperloop.pycycle import start
+from pycycle import start
 
 class StartTestCase(unittest.TestCase):
 
     def test_start(self): 
-        s = set_as_top(start.FlowStart())
+        comp = set_as_top(start.FlowStart())
 
-        start.W = 1.582
-        start.Pt = 99
-        start.Tt = 292
-        start.Mach = 1.0
+        comp.W = 3.488
+        comp.Pt = .03
+        comp.Tt = 630.75
+        comp.Mach = 1.0
 
-        start.run()
+        comp.run()
 
-        self.assertAlmostEqual(start.Fl_O.W, 1.582)
-        self.assertAlmostEqual(start.Fl_O.Pt, 187.43)
-        self.assertAlmostEqual(start.Fl_O.Tt, 292)
-        self.assertAlmostEqual(start.Fl_O.rhos, 0.001181)
-        self.assertAlmostEqual(start.Fl_O.Mach, 1.00)
-        self.assertAlmostEqual(start.Fl_O.Area, 39100.5)
+        self.assertAlmostEqual(comp.Fl_O.W, 3.488)
+        self.assertAlmostEqual(comp.Fl_O.Pt, .03)
+        self.assertAlmostEqual(comp.Fl_O.Tt, 630.75)
+        #self.assertAlmostEqual(comp.Fl_O.rhos, .000074)
+        self.assertAlmostEqual(comp.Fl_O.Mach, 1.00)
+        self.assertAlmostEqual(comp.Fl_O.area, 6060.6)
 
         
 if __name__ == "__main__":

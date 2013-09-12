@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pyflowstation.pyflowstation import FlowStation
+from pycycle.flowstation import FlowStation
 
 
 
@@ -17,8 +17,6 @@ class FlowStart(Component):
 
 
     def execute(self): 
-        self.Fl_O.setDryAir()
-
         self.Fl_O.setTotalTP(self.Tt, self.Pt)
         self.Fl_O.W = self.W
         self.Fl_O.Mach = self.Mach

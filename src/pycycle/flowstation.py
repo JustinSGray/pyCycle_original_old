@@ -7,7 +7,7 @@ from openmdao.lib.datatypes.api import Float, VarTree
 
 from Cantera import *
 
-import pyflowstation #used to find file paths
+import pycycle #used to find file paths
 
 
 #secant solver with adaptive (sort of) stepping
@@ -54,7 +54,7 @@ class CanteraFlowStation(VariableTree):
         super(CanteraFlowStation, self).__init__(*args,**kwargs)
 
         #properties file path
-        _dir = dirname(pyflowstation.__file__)
+        _dir = dirname(pycycle.__file__)
         _prop_file = join(_dir,'gri1000.cti')
 
         self._trigger = 0
@@ -230,7 +230,7 @@ class CanteraFlowStation(VariableTree):
         self.MachTemp=0
         self.Ps=self.Pt*(1 + (self.gamt-1)/2*self.Mach**2)**(self.gamt/(1-self.gamt))
         
-        def eval(Ps):
+        def f(Ps):
             self.Ps=Ps
             self._flowS=self._flow 
             self._flowS.set(S=self.s/0.000238845896627, P=self.Ps*6894.75729)
@@ -244,7 +244,10 @@ class CanteraFlowStation(VariableTree):
             self.MachTemp=self.Vflow / Vson
             return self.Mach - self.MachTemp
 
-        secant(eval, self.Ps-.1, self.Ps)
+        guess = self.Ps-.1
+        if guess < 0: 
+            guess = self.Ps
+        secant(f, guess, self.Ps)
 
     #set the statics based on pressure
     def setStaticPs(self):

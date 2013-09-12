@@ -4,6 +4,7 @@ setup.cfg
 setup.py
 src/pycycle/__init__.py
 src/pycycle/compressor.py
+src/pycycle/flowstation.py
 src/pycycle/heat_exchanger.py
 src/pycycle/inlet.py
 src/pycycle/nozzle.py
@@ -17,4 +18,5 @@ src/pycycle.egg-info/requires.txt
 src/pycycle.egg-info/top_level.txt
 src/pycycle/test/__init__.py
 src/pycycle/test/test_compressor.py
+src/pycycle/test/test_flowstation.py
 src/pycycle/test/test_start.py
