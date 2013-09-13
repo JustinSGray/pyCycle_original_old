@@ -11,25 +11,29 @@ class CompressorTestCase(unittest.TestCase):
     def test_compressor(self): 
         comp = set_as_top(compressor.Compressor())
 
-        comp.PRdes = 3.488
+        comp.PR_des = 12.47
         comp.MNexit_des = .4
         comp.eff_des = .80
 
-        fs = flowstation.FlowStation()
+        fs = flowstation.CanteraFlowStation()
         fs.W = 1.08
-        fs.setTotalTP(630.75, 0.0272)
+        fs.setTotalTP(630.74523, 0.0271945)
         fs.Mach = .6
 
-        ccomp.Fl_I = fs
+        comp.Fl_I = fs
+        comp.design = True
 
         comp.run()
 
-        assert_rel_error(self,comp.Fl_O.W, 1.08,.005)
-        assert_rel_error(self,comp.Fl_O.Pt, .34, .005)
-        assert_rel_error(self,comp.Fl_O.Tt, 1424.01, .005)
-        assert_rel_error(self,comp.Fl_O.rhos, .000594, .005)
-        assert_rel_error(self,comp.Fl_O.Mach, .4 ,.005)
-        assert_rel_error(self,comp.Fl_O.area, 364.7, .005)
+        TOL = .001
+        assert_rel_error(self,comp.Fl_O.W, 1.08,TOL)
+        assert_rel_error(self,comp.Fl_O.Pt, .33899, TOL)
+        assert_rel_error(self,comp.Fl_O.Tt, 1424.01, TOL)
+        assert_rel_error(self,comp.Fl_O.rhos, .000594, TOL)
+        assert_rel_error(self,comp.Fl_O.Mach, .4 ,TOL)
+        assert_rel_error(self,comp.Fl_O.area, 364.7, TOL)
+        assert_rel_error(self,comp.pwr, 303.2, TOL)
+        assert_rel_error(self,comp.eff_poly, .8545, TOL)
 
         
 if __name__ == "__main__":

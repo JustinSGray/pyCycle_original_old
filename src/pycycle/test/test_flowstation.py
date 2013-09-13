@@ -1,7 +1,7 @@
 
 import unittest
 
-from pyflowstation.pyflowstation import CanteraFlowStation
+from pycycle.flowstation import CanteraFlowStation
 
 class FlowStationTestCase(unittest.TestCase):
 

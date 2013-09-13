@@ -9,6 +9,7 @@ from Cantera import *
 
 import pycycle #used to find file paths
 
+GAS_CONSTANT = 0.0685592 #BTU/lbm-R
 
 #secant solver with adaptive (sort of) stepping
 def secant(func, oldx, x, TOL=1e-5, MAXDX=10000000 ):
@@ -37,7 +38,7 @@ class CanteraFlowStation(VariableTree):
     rhot=Float(0.0, desc='total density', unit='lbm/ft3') 
     gamt=Float(0.0, desc='total gamma', unit='') 
     s =Float(0.0, desc='entropy', unit='BTU/lbm-R')
-    W =Float(0.0, desc='weight flow', unit='') 
+    W =Float(0.0, desc='weight flow', unit='lbm/s') 
     FAR =Float(0.0, desc='fuel to air ratio', unit='') 
     WAR =Float(0.0, desc='water to air ratio', unit='') 
     hs=Float(0.0, desc='static enthalpy', unit='BTU/lbm')
@@ -48,6 +49,7 @@ class CanteraFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', unit='ft/sec')   
     Mach=Float(0.0, desc='Mach number', unit='')
     area =Float(0.0, desc='flow area', unit='in2') 
+    Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
@@ -64,6 +66,7 @@ class CanteraFlowStation(VariableTree):
         self._flow=importPhase(_prop_file)
         self._flowS=importPhase(_prop_file)
         self.setDryAir()
+        self.setTotalTP(518,15)
     
     #add a reactant that can be mixed in
     def add_reactant(self, reactant):
@@ -71,8 +74,8 @@ class CanteraFlowStation(VariableTree):
                     if self.reactants[i] == reactant:
                             return
             self.reactants.append(reactant)
-        
-        
+
+
     #trigger action on Mach
     def _Mach_changed(self):
         if self._trigger == 0:
@@ -133,6 +136,7 @@ class CanteraFlowStation(VariableTree):
         self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
         self._flowS=self._flow 
         self.setStatic()
+        self._calculated_properties()
         self._trigger=0
 
     #set total conditions based on h and P
@@ -147,6 +151,7 @@ class CanteraFlowStation(VariableTree):
         self.rhot=self._flow.density()*.0624
         self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
         self.setStatic()
+        self._calculated_properties()
         self._trigger=0
 
     #set total condition based on S and P
@@ -155,12 +160,13 @@ class CanteraFlowStation(VariableTree):
         self.s=sin
         self.Pt=Pin             
         self._flow.set(S=sin/0.000238845896627, P=Pin*6894.75729)
-        self._flow.equilibrate('SP')
+        self._flow.equilibrate('SP', loglevel=1)
         self.Tt=self._flow.temperature()*9./5.
         self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
         self.rhot=self._flow.density()*.0624
         self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
         self.setStatic()
+        self._calculated_properties()
         self._trigger=0
 
     #add another station to this one
@@ -265,6 +271,9 @@ class CanteraFlowStation(VariableTree):
 
     #determine which static calc to use
     def setStatic(self):
+        if (self.Tt and self.Pt): # if non zero
+            self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)
+
         if self._mach_or_area == 0:
             pass
         elif self._mach_or_area == 1:
@@ -281,6 +290,10 @@ class CanteraFlowStation(VariableTree):
             secant(F1, Mach+.05, Mach, MAXDX=.1)
         elif self._mach_or_area == 3:
             self.setStaticPs()
+
+    def _calculated_properties(self): 
+        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)
+
 
     #set the statics based on Ts, Ps, and MN
     #UPDGRAEDE TO USE LOOPS
