@@ -49,6 +49,7 @@ class CanteraFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', unit='ft/sec')   
     Mach=Float(0.0, desc='Mach number', unit='')
     area =Float(0.0, desc='flow area', unit='in2') 
+    
     Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
 
     #intialize station        
@@ -75,6 +76,11 @@ class CanteraFlowStation(VariableTree):
                             return
             self.reactants.append(reactant)
 
+    def _W_changed(self): 
+        if self._trigger == 0:
+            self._trigger=1
+            self.setStatic()
+            self._trigger=0
 
     #trigger action on Mach
     def _Mach_changed(self):

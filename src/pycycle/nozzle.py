@@ -14,9 +14,11 @@ class Nozzle(Component):
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor")
     Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor")
 
+    design = Event(desc="flag to indicate that the calculations are design conditions")
 
     def execute(self): 
-        pass
+        
+                    
 
 
 if __name__ == "__main__": 

@@ -1,27 +1,22 @@
 
 import unittest
 
-from openmdao.main.api import set_as_top, Assembly
+from openmdao.main.api import set_as_top
 from openmdao.util.testutil import assert_rel_error
 
 from pycycle import nozzle, flowstation
 
-class NozzleTestCase(unittest.TestCase):
+class StartTestCase(unittest.TestCase):
 
-    def test_start(self):   
-        a = set_as_top(Assembly())
+    def test_start(self): 
+        comp = set_as_top(nozzle.Nozzle())
 
+        fs = flowstation.CanteraFlowStation()
+        fs.W = .639
+        fs.setTotalTP(630.75 , 0.0272)
+        fs.Mach = 1.0
 
-        start = a.add('start', start.FlowStart())
-
-        start.W = .639
-        start.Pt = 0.0272
-        start.Tt = 630.75
-        start.Mach = 1.0
-
-        comp = a.add('comp',nozzle.Nozzle())
-
-        a.connect
+        comp.Fl_I = fs
 
         fs_ref = flowstation.FlowStation()
         fs_ref.W = 3.488
