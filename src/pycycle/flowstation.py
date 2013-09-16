@@ -32,16 +32,16 @@ class CanteraFlowStation(VariableTree):
 
     reactants=["Air", "H2O"]
 
-    ht=Float(0.0, desc='total enthalpy', unit='BTU/lbm')
+    ht=Float(0.0, desc='total enthalpy', unit='Btu/lbm')
     Tt=Float(0.0, desc='total temperature', unit='R')
     Pt=Float(0.0, desc='total pressure', unit='lbf/in2')
     rhot=Float(0.0, desc='total density', unit='lbm/ft3') 
     gamt=Float(0.0, desc='total gamma', unit='') 
-    s =Float(0.0, desc='entropy', unit='BTU/lbm-R')
+    s =Float(0.0, desc='entropy', unit='Btu/lbm-R')
     W =Float(0.0, desc='weight flow', unit='lbm/s') 
     FAR =Float(0.0, desc='fuel to air ratio', unit='') 
     WAR =Float(0.0, desc='water to air ratio', unit='') 
-    hs=Float(0.0, desc='static enthalpy', unit='BTU/lbm')
+    hs=Float(0.0, desc='static enthalpy', unit='Btu/lbm')
     Ts=Float(0.0, desc='static temperature', unit='R')
     Ps=Float(0.0, desc='static pressure', unit='lbf/in2')
     rhos=Float(0.0, desc='static density', unit='lbm/ft3')
@@ -49,7 +49,7 @@ class CanteraFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', unit='ft/sec')   
     Mach=Float(0.0, desc='Mach number', unit='')
     area =Float(0.0, desc='flow area', unit='in2') 
-    
+
     Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
 
     #intialize station        
