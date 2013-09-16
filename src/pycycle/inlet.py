@@ -1,11 +1,11 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pyflowstation.pyflowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.cycle_component import CycleComponent
 
 
-
-class Inlet(Component): 
+class Inlet(CycleComponent): 
     """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
     to a slower mach number and larger area"""
 
@@ -17,7 +17,22 @@ class Inlet(Component):
 
 
     def execute(self): 
-        pass
+        Fl_I = self.Fl_I
+        Fl_O = self.Fl_O 
+
+        Pt_out = Fl_I.Pt*self.ram_recovery
+        Fl_O.setTotalTP(Fl_I.Tt, Pt_out)
+        Fl_O.W = Fl_I.W
+
+        if self.run_design: 
+            Fl_O.Mach = self.MNexit_des
+            self._exit_area_des = Fl_O.area
+        else: 
+            Fl_O.area = self._exit_area_des
+
+        super(Inlet, self).execute()
+
+
 
 
 if __name__ == "__main__": 
@@ -25,3 +40,4 @@ if __name__ == "__main__":
 
     c = set_as_top(Inlet())
     c.run()
+
