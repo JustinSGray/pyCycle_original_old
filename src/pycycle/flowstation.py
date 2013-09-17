@@ -12,7 +12,7 @@ import pycycle #used to find file paths
 GAS_CONSTANT = 0.0685592 #BTU/lbm-R
 
 #secant solver with a limit on overall step size
-def secant(func, x0, TOL=1e-5, MAXDX=10000000, x_min=1e15, x_max=1e15 ):
+def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
     if x0 >= 0:
         x1 = x0*(1 + 1e-4) + 1e-4
     else:
@@ -315,7 +315,7 @@ class CanteraFlowStation(VariableTree):
             if self.sub_or_super == "sub": 
                 guess = (self.Pt+m1_ps)/2
                 def f(Ps):
-                    print "test: ", Ps, self.Pt
+                    #print "test: ", Ps, self.Pt
                     self.Ps = Ps
                     self.setStaticPs()
                     return self.W/(self.rhos*self.Vflow)*144.-target_area
@@ -326,8 +326,6 @@ class CanteraFlowStation(VariableTree):
                     self.setStaticPs()
                     return self.W/(self.rhos*self.Vflow)*144.-target_area
 
-           
-            #secant(f, Mach+.05, Mach, MAXDX=.1)
             secant(f,  guess, x_min=0, x_max=self.Pt)
         elif self._mach_or_area == 3:
             self.setStaticPs()
