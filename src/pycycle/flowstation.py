@@ -11,23 +11,26 @@ import pycycle #used to find file paths
 
 GAS_CONSTANT = 0.0685592 #BTU/lbm-R
 
-#secant solver with adaptive (sort of) stepping
-def secant(func, oldx, x, TOL=1e-5, MAXDX=10000000 ):
-    oldf, f = func(oldx), func(x)
-    if (abs(f) > abs(oldf)):
-        oldx, x = x, oldx 
-        oldf, f = f, oldf
+#secant solver with a limit on overall step size
+def secant(func, x0, TOL=1e-5, MAXDX=10000000 ):
+    if x0 >= 0:
+        x1 = x0*(1 + 1e-4) + 1e-4
+    else:
+        x1 = x0*(1 + 1e-4) - 1e-4
+    f1, f = func(x1), func(x0)
+    if (abs(f) > abs(f1)):
+        x1, x0 = x0, x1 
+        f1, f = f, f1
     count = 0
     while 1:
-        dx = f * (x - oldx) / float(f - oldf)   
+        dx = f * (x0 - x1) / float(f - f1)   
         if abs( dx ) > MAXDX: dx = MAXDX*abs(dx)/dx
-        if abs(dx) < TOL * (1 + abs(x)): return x - dx
-        oldx, x = x, x - dx
-        oldf, f = f, func(x) 
+        if abs(dx) < TOL * (1 + abs(x0)): return x0 - dx
+        x1, x0 = x0, x0 - dx
+        f1, f = f, func(x0) 
         count = count + 1
 
-    return x
-
+    return x0
 
 
 class CanteraFlowStation(VariableTree):
@@ -265,7 +268,8 @@ class CanteraFlowStation(VariableTree):
         guess = self.Ps-.1
         if guess < 0: 
             guess = self.Ps
-        secant(f, guess, self.Ps)
+        #secant(f, guess, self.Ps)
+        self.Ps = secant(f, guess)
 
     #set the statics based on pressure
     def setStaticPs(self):
@@ -297,12 +301,13 @@ class CanteraFlowStation(VariableTree):
             else:
                 Mach= 1.45
 
-            def F1(Mach):
+            def f(Mach):
                 self.Mach=Mach
                 self.setStaticMach()
                 return self.W/(self.rhos*self.Vflow)*144.-self.area 
 
-            secant(F1, Mach+.05, Mach, MAXDX=.1)
+            #secant(f, Mach+.05, Mach, MAXDX=.1)
+            secant(f,  Mach, MAXDX=.1)
         elif self._mach_or_area == 3:
             self.setStaticPs()
 
