@@ -79,9 +79,10 @@ class Nozzle(CycleComponent):
             Fl_O.sub_or_super = "super"
             PsOut = Fl_ref.Ps
             def F( Ps ):
-                Fl_O.Ps = Ps
+                Fl_O.Ps = abs(Ps)
                 return Fl_O.area - self.Aexit_des
-            Fl_O.Ps = secant( F, PsOut )
+            Fl_O.Ps = secant( F, PsOut, MAXDX=1 )
+            #Fl_O.Ps = brentq(F,-Fl_O.Pt,Fl_O.Pt)
             MachSupersonic = Fl_O.Mach
             PsSupersonic = Fl_O.Ps
 
