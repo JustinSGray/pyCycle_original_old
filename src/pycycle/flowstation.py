@@ -26,6 +26,8 @@ def secant(func, oldx, x, TOL=1e-5, MAXDX=10000000 ):
         oldf, f = f, func(x) 
         count = count + 1
 
+    return x
+
 
 
 class CanteraFlowStation(VariableTree):
@@ -74,8 +76,8 @@ class CanteraFlowStation(VariableTree):
     #add a reactant that can be mixed in
     def add_reactant(self, reactant):
             for i in range(0, len(self.reactants)):
-                    if self.reactants[i] == reactant:
-                            return
+                if self.reactants[i] == reactant:
+                    return
             self.reactants.append(reactant)
 
     def _W_changed(self): 
