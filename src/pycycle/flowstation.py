@@ -3,7 +3,7 @@ __all__ = ['CanteraFlowStation']
 from os.path import dirname, join
 
 from openmdao.main.api import VariableTree
-from openmdao.lib.datatypes.api import Float, VarTree
+from openmdao.lib.datatypes.api import Float, VarTree, Enum
 
 from Cantera import *
 
@@ -49,8 +49,10 @@ class CanteraFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', unit='ft/sec')   
     Mach=Float(0.0, desc='Mach number', unit='')
     area =Float(0.0, desc='flow area', unit='in2') 
-
+    sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
+    
     Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
+
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
@@ -85,26 +87,28 @@ class CanteraFlowStation(VariableTree):
     #trigger action on Mach
     def _Mach_changed(self):
         if self._trigger == 0:
-                self._trigger=1
-                self._mach_or_area=1
-                self.setStatic()
-                self._trigger=0
+            self._trigger=1
+            self._mach_or_area=1
+            self.setStatic()
+            self._trigger=0
                     
     #trigger action on area        
     def _area_changed(self):
         if self._trigger == 0:
-                self._trigger =1
-                self._mach_or_area=2
-                self.setStatic()
-                self._trigger=0
+            self._trigger=1
+            self._mach_or_area=2
+            self.setStatic()
+            self._trigger=0
            
     #trigger action on static pressure       
     def _Ps_changed(self):
         if self._trigger == 0:
-                self._trigger=1
-                self._mach_or_area=3
-                self.setStatic()
-                self._trigger=0 
+            self._trigger=1
+            self._mach_or_area=3
+            self.setStatic()
+            self._trigger=0 
+
+
     
     #set the composition to dry air
     def setDryAir(self):
@@ -286,7 +290,10 @@ class CanteraFlowStation(VariableTree):
             self.setStaticMach()
             self.area= self.W / (self.rhos*self.Vflow)*144. 
         elif self._mach_or_area ==2:
-            Mach=.45
+            if self.sub_or_super == "sub": 
+                Mach=.45
+            else:
+                Mach= 1.45
 
             def F1(Mach):
                 self.Mach=Mach

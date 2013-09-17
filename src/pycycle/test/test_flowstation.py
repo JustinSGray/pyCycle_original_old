@@ -134,6 +134,14 @@ class TestStatics(unittest.TestCase):
         self.fs.setStaticTsPsMN(1081.802, 376.219, .3)
         self._assert()
         
+    def test_set_sub_or_super(self): 
+        self.fs.sub_or_super = "super"
+        self.fs.area = 32
+        self.assertGreater(self.fs.Mach, 1)
+
+        self.fs.sub_or_super = "sub"
+        self.fs.area = 32.000001
+        self.assertLess(self.fs.Mach, 1)
 if __name__ == "__main__":
     unittest.main()
     
