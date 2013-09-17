@@ -5,11 +5,12 @@ from pycycle.flowstation import FlowStation, CanteraFlowStation
 from pycycle.cycle_component import CycleComponent
 
 
-class Inlet(CycleComponent): 
+class Duct(CycleComponent): 
     """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
     to a slower mach number and larger area"""
 
-    ram_recovery = Float(1.000, iotype="in", desc="fraction of the total pressure retained")
+    dPqP = Float(1.000, iotype="in", desc="pressure differential as a fraction of incomming pressure")
+    Q_dot = Float(0.00, iotype="in", units="Btu/s", desc="heat flow rate into (positive) or out of (negative) the air")
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
 
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor")
@@ -20,8 +21,9 @@ class Inlet(CycleComponent):
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O 
 
-        Pt_out = Fl_I.Pt*self.ram_recovery
-        Fl_O.setTotalTP(Fl_I.Tt, Pt_out)
+        Pt_out = Fl_I.Pt*(1-self.dPqP)
+        q = self.Q_dot/Fl_I.W
+        Fl_O.setTotal_hP(Fl_I.ht+q, Pt_out)
         Fl_O.W = Fl_I.W
 
         if self.run_design: 
@@ -30,7 +32,7 @@ class Inlet(CycleComponent):
         else: 
             Fl_O.area = self._exit_area_des
 
-        super(Inlet, self).execute()
+        super(Duct, self).execute()
 
 
 

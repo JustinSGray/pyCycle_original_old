@@ -3,7 +3,7 @@ __all__ = ['CanteraFlowStation']
 from os.path import dirname, join
 
 from openmdao.main.api import VariableTree
-from openmdao.lib.datatypes.api import Float, VarTree
+from openmdao.lib.datatypes.api import Float, VarTree, Enum
 
 from Cantera import *
 
@@ -32,16 +32,16 @@ class CanteraFlowStation(VariableTree):
 
     reactants=["Air", "H2O"]
 
-    ht=Float(0.0, desc='total enthalpy', unit='BTU/lbm')
+    ht=Float(0.0, desc='total enthalpy', unit='Btu/lbm')
     Tt=Float(0.0, desc='total temperature', unit='R')
     Pt=Float(0.0, desc='total pressure', unit='lbf/in2')
     rhot=Float(0.0, desc='total density', unit='lbm/ft3') 
     gamt=Float(0.0, desc='total gamma', unit='') 
-    s =Float(0.0, desc='entropy', unit='BTU/lbm-R')
+    s =Float(0.0, desc='entropy', unit='Btu/lbm-R')
     W =Float(0.0, desc='weight flow', unit='lbm/s') 
     FAR =Float(0.0, desc='fuel to air ratio', unit='') 
     WAR =Float(0.0, desc='water to air ratio', unit='') 
-    hs=Float(0.0, desc='static enthalpy', unit='BTU/lbm')
+    hs=Float(0.0, desc='static enthalpy', unit='Btu/lbm')
     Ts=Float(0.0, desc='static temperature', unit='R')
     Ps=Float(0.0, desc='static pressure', unit='lbf/in2')
     rhos=Float(0.0, desc='static density', unit='lbm/ft3')
@@ -49,8 +49,10 @@ class CanteraFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', unit='ft/sec')   
     Mach=Float(0.0, desc='Mach number', unit='')
     area =Float(0.0, desc='flow area', unit='in2') 
+    sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
     
     Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
+
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
@@ -85,26 +87,28 @@ class CanteraFlowStation(VariableTree):
     #trigger action on Mach
     def _Mach_changed(self):
         if self._trigger == 0:
-                self._trigger=1
-                self._mach_or_area=1
-                self.setStatic()
-                self._trigger=0
+            self._trigger=1
+            self._mach_or_area=1
+            self.setStatic()
+            self._trigger=0
                     
     #trigger action on area        
     def _area_changed(self):
         if self._trigger == 0:
-                self._trigger =1
-                self._mach_or_area=2
-                self.setStatic()
-                self._trigger=0
+            self._trigger=1
+            self._mach_or_area=2
+            self.setStatic()
+            self._trigger=0
            
     #trigger action on static pressure       
     def _Ps_changed(self):
         if self._trigger == 0:
-                self._trigger=1
-                self._mach_or_area=3
-                self.setStatic()
-                self._trigger=0 
+            self._trigger=1
+            self._mach_or_area=3
+            self.setStatic()
+            self._trigger=0 
+
+
     
     #set the composition to dry air
     def setDryAir(self):
@@ -286,7 +290,10 @@ class CanteraFlowStation(VariableTree):
             self.setStaticMach()
             self.area= self.W / (self.rhos*self.Vflow)*144. 
         elif self._mach_or_area ==2:
-            Mach=.45
+            if self.sub_or_super == "sub": 
+                Mach=.45
+            else:
+                Mach= 1.45
 
             def F1(Mach):
                 self.Mach=Mach
