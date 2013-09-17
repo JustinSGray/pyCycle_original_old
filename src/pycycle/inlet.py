@@ -12,8 +12,8 @@ class Inlet(CycleComponent):
     ram_recovery = Float(1.000, iotype="in", desc="fraction of the total pressure retained")
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor")
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor")
+    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor", copy=None)
+    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor", copy=None)
 
 
     def execute(self): 
@@ -29,8 +29,6 @@ class Inlet(CycleComponent):
             self._exit_area_des = Fl_O.area
         else: 
             Fl_O.area = self._exit_area_des
-
-        super(Inlet, self).execute()
 
 
 

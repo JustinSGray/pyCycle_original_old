@@ -32,8 +32,6 @@ class Duct(CycleComponent):
         else: 
             Fl_O.area = self._exit_area_des
 
-        super(Duct, self).execute()
-
 
 
 

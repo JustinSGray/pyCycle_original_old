@@ -24,8 +24,8 @@ class Compressor(CycleComponent):
     eff_poly = Float(iotype="out", desc="polytropic efficiency at the operating condition")
     pwr = Float(iotype="out", units="hp", desc="power required to run the compressor at the operating condition")
     Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor")
-    tip_radius = Float(iotype="out", units="in", desc="radius at the tip of the compressor")
-    hub_radius = Float(iotype="out", units="in", desc="radius at the tip of the compressor")
+    tip_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
+    hub_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
 
 
     def _op_line(self,Wc): 
@@ -75,8 +75,6 @@ class Compressor(CycleComponent):
 
         self.tip_radius = (Fl_O.area/math.pi/(1-self.hub_to_tip**2))**.5
         self.hub_radius = self.hub_to_tip*self.tip_radius
-
-        super(Compressor, self).execute()
 
 
 if __name__ == "__main__": 

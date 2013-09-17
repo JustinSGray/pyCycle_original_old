@@ -132,6 +132,8 @@ class Nozzle(CycleComponent):
                 Fl_O.area = self.Aexit_des
             if abs(Fl_ref.Ps - PsSupersonic)/Fl_ref.Ps < .001: 
                 self.switchRegime = "PERFECTLY_EXPANDED"
+
+                
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
 

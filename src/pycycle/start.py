@@ -2,10 +2,10 @@ from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
 from pycycle.flowstation import FlowStation
+from pycycle.cycle_component import CycleComponent
 
 
-
-class FlowStart(Component): 
+class FlowStart(CycleComponent): 
     """Flow initialization""" 
 
     W = Float(1, iotype="in", desc="mass flow rate", units="lbm/s")
@@ -13,7 +13,7 @@ class FlowStart(Component):
     Tt = Float(518, iotype="in", desc="total temperature", units="R")
     Mach = Float(.1, iotype="in", desc="Mach Number")
 
-    Fl_O = FlowStation(iotype="out", desc="outgoing flow at the specified conditions")
+    Fl_O = FlowStation(iotype="out", desc="outgoing flow at the specified conditions", copy=None)
 
 
     def execute(self): 

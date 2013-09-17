@@ -18,6 +18,6 @@ class CycleComponent(Component):
         self.run_design = True
 
 
-    def run(self): 
-        super(CycleComponent, self).run()
+    def run(self,*args,**kwargs): 
+        super(CycleComponent, self).run(*args,**kwargs)
         self.run_design = False
