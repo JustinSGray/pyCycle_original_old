@@ -250,7 +250,6 @@ class CanteraFlowStation(VariableTree):
     def setStaticMach(self):
         self.MachTemp=0
         self.Ps=self.Pt*(1 + (self.gamt-1)/2*self.Mach**2)**(self.gamt/(1-self.gamt))
-        
         def f(Ps):
             self.Ps=Ps
             self._flowS=self._flow 
@@ -265,16 +264,13 @@ class CanteraFlowStation(VariableTree):
             self.MachTemp=self.Vflow / Vson
             return self.Mach - self.MachTemp
 
-        guess = self.Ps-.1
-        if guess < 0: 
-            guess = self.Ps
-        #secant(f, guess, self.Ps)
-        self.Ps = secant(f, guess)
+        guess = self.Pt*.9
+        self.Ps = secant(f, guess, MAXDX=.01)
 
     #set the statics based on pressure
     def setStaticPs(self):
         self._flowS=self._flow 
-        self._flowS.set(S=self.s/0.000238845896627, P=self.Ps*6894.75729)
+        self._flowS.set(S=self.s/0.000238845896627, P=self.Ps*6894.75729) 
         self._flowS.equilibrate('SP')
         self.Ts=self._flowS.temperature()*9./5.
         self.rhos=self._flowS.density()*.0624
