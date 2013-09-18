@@ -291,9 +291,13 @@ class CanteraFlowStation(VariableTree):
 
     def setStaticArea(self): 
         target_area = self.area
-        self.Mach = 1
-        self.setStaticMach()
-        Ps_M1 = self.Ps
+        Ps_guess=self.Pt*(1 + (self.gamt-1)/2)**(self.gamt/(1-self.gamt)) #at mach 1
+        def f(Ps):
+            self.Ps = Ps
+            self.setStaticPs()
+            return 1-self.Mach
+        
+        Ps_M1 = secant(f,Ps_guess,x_min=0,x_max=self.Pt)
 
         #find the subsonic solution first
         guess = (self.Pt+Ps_M1)/2
@@ -309,11 +313,6 @@ class CanteraFlowStation(VariableTree):
             self.Mach = 1/self.Mach
             self.setStaticMach()
             guess = self.Ps
-            def f(Ps):
-                self.Ps = Ps
-                self.setStaticPs()
-                return self.W/(self.rhos*self.Vflow)*144.-target_area
-
             secant(f,  guess, x_min=0, x_max=Ps_M1)
 
     #determine which static calc to use
