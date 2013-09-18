@@ -87,11 +87,11 @@ class NozzleTestCaseResonable(unittest.TestCase):
         self.assertEqual(self.comp.switchRegime,'OVEREXPANDED')
 
         
-        self.comp.Fl_ref.setTotalTP( 518.67, 28.0 )
+        self.comp.Fl_ref.setTotalTP( 518.67, 27.0 )
         self.comp.run()
         self.assertEqual(self.comp.switchRegime,'OVEREXPANDED')
 
-        
+
         self.comp.Fl_ref.setTotalTP( 518.67, 32.0 )
         self.comp.run()
         self.assertEqual(self.comp.switchRegime,'OVEREXPANDED')
@@ -134,7 +134,7 @@ class NozzleTestCaseResonable(unittest.TestCase):
         self.assertEqual(self.comp.switchRegime,'PERFECTLY_EXPANDED')
 
 
-class NozzleTestCaseVeryLowPressure(unittest.TestCase):
+class NozzleTestCaseVeryLowTemp(unittest.TestCase):
 
     def test_nozzle_very_low_temperatures(self): 
         comp = set_as_top(nozzle.Nozzle())
@@ -164,7 +164,6 @@ class NozzleTestCaseVeryLowPressure(unittest.TestCase):
         assert_rel_error(self,comp.Fl_O.rhos, .000177443, TOL)
 
         #off design calcs
-        comp.run()
         assert_rel_error(self,comp.Fl_O.W, .639, TOL)
         assert_rel_error(self,comp.Fl_O.Pt, .34, TOL)
         assert_rel_error(self,comp.Fl_O.Tt, 540.0, TOL)

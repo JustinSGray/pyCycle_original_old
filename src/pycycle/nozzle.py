@@ -47,7 +47,7 @@ class Nozzle(CycleComponent):
         fs_throat.W = Fl_I.W
         fs_throat.setTotalTP( Fl_I.Tt, Fl_I.Pt )
         fs_throat.Mach = 1.0
-        Athroat_dmd = fs_throat.area
+        self.Athroat_dmd = fs_throat.area
 
         fs_exitIdeal.W = Fl_I.W
         fs_exitIdeal.setTotalTP( Fl_I.Tt, Fl_I.Pt )
@@ -79,10 +79,12 @@ class Nozzle(CycleComponent):
             Fl_O.sub_or_super = "super"
             PsOut = Fl_ref.Ps
             def F( Ps ):
-                Fl_O.Ps = abs(Ps)
+                Fl_O.Ps = Ps
                 return Fl_O.area - self.Aexit_des
             Fl_O.Ps = secant( F, PsOut, x_min=0, x_max=Fl_O.Pt )
-            #Fl_O.Ps = brentq(F,-Fl_O.Pt,Fl_O.Pt)
+            #you might find the sub-sonic solution, so try again
+            if Fl_O.Mach < 1: 
+                Fl_O.Ps = secant( F, Fl_O.Ps*.5, x_min=0, x_max=Fl_O.Pt )
             MachSupersonic = Fl_O.Mach
             PsSupersonic = Fl_O.Ps
 
@@ -93,7 +95,7 @@ class Nozzle(CycleComponent):
             Fl_O.setTotalTP( fs_throat.Tt, PtExit )
             Fl_O.area = self.Aexit_des      
             PsShock = Fl_O.Ps
-            
+
             # find correct operating regime
             # curves 1 to 4
             if Fl_ref.Ps >= PsSubsonic:
@@ -134,6 +136,9 @@ class Nozzle(CycleComponent):
             if abs(Fl_ref.Ps - PsSupersonic)/Fl_ref.Ps < .001: 
                 self.switchRegime = "PERFECTLY_EXPANDED"
 
+            self.PsSubsonic = PsSubsonic
+            self.PsSupersonic = PsSupersonic
+            self.PsShock = PsShock
                 
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top

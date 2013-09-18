@@ -3,9 +3,11 @@ README.txt
 setup.cfg
 setup.py
 src/pycycle/__init__.py
+src/pycycle/api.py
 src/pycycle/compressor.py
+src/pycycle/cycle_component.py
+src/pycycle/duct.py
 src/pycycle/flowstation.py
-src/pycycle/heat_exchanger.py
 src/pycycle/inlet.py
 src/pycycle/nozzle.py
 src/pycycle/splitter.py
@@ -18,5 +20,9 @@ src/pycycle.egg-info/requires.txt
 src/pycycle.egg-info/top_level.txt
 src/pycycle/test/__init__.py
 src/pycycle/test/test_compressor.py
+src/pycycle/test/test_duct.py
 src/pycycle/test/test_flowstation.py
+src/pycycle/test/test_inlet.py
+src/pycycle/test/test_nozzle.py
+src/pycycle/test/test_splitter.py
 src/pycycle/test/test_start.py

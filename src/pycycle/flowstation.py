@@ -27,10 +27,9 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
         if abs(dx) < TOL * (1 + abs(x0)): 
             return x0 - dx
         if x0-dx < x_min: 
-            #print "min limit: ", x0-dx
-            x1, x0 = x0, (x_min+x0)/2
+            x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
+            #x1, x0 = x0, (x_max+x0)/2
         elif x0-dx > x_max: 
-            #print "max limit: ", x0-dx
             x1, x0 = x0, (x_max+x0)/2
         else:    
             x1, x0 = x0, x0 - dx
@@ -255,7 +254,7 @@ class CanteraFlowStation(VariableTree):
        
     #set the statics based on Mach
     def setStaticMach(self):
-        self.MachTemp=0
+        MachTemp=0
         self.Ps=self.Pt*(1 + (self.gamt-1)/2*self.Mach**2)**(self.gamt/(1-self.gamt))
         def f(Ps):
             self.Ps=Ps
@@ -268,8 +267,8 @@ class CanteraFlowStation(VariableTree):
             self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
             Vson=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
             self.Vflow=math.sqrt(778.169*32.1740*2*(self.ht-self.hs))
-            self.MachTemp=self.Vflow / Vson
-            return self.Mach - self.MachTemp
+            MachTemp=self.Vflow / Vson
+            return self.Mach - MachTemp
 
         guess = self.Pt*.9
         self.Ps = secant(f, guess, x_min=0, x_max=self.Pt)
@@ -284,7 +283,6 @@ class CanteraFlowStation(VariableTree):
         self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
         self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
         Vson=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
-        #print "check: ", self.ht, self.hs, 778.169*32.1740*2*(self.ht-self.hs)
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
         self.Mach=self.Vflow / Vson
         self.area= self.W / (self.rhos*self.Vflow)*144. 
@@ -310,23 +308,29 @@ class CanteraFlowStation(VariableTree):
             target_area = self.area
             self.Mach = 1
             self.setStaticMach()
-            m1_ps = self.Ps
+            Ps_M1 = self.Ps
 
-            if self.sub_or_super == "sub": 
-                guess = (self.Pt+m1_ps)/2
-                def f(Ps):
-                    #print "test: ", Ps, self.Pt
-                    self.Ps = Ps
-                    self.setStaticPs()
-                    return self.W/(self.rhos*self.Vflow)*144.-target_area
-            else:
-                guess = .9*m1_ps
-                def f(Ps):
-                    self.Ps = Ps
-                    self.setStaticPs()
-                    return self.W/(self.rhos*self.Vflow)*144.-target_area
-
+            #find the subsonic solution first
+            guess = (self.Pt+Ps_M1)/2
+            def f(Ps):
+                self.Ps = Ps
+                self.setStaticPs()
+                return self.W/(self.rhos*self.Vflow)*144.-target_area
             secant(f,  guess, x_min=0, x_max=self.Pt)
+
+            #if you want the supersonic one, just keep going with a little lower initial guess    
+            if self.sub_or_super == "super":
+                #jsg: wild guess of 1/M_subsonic
+                self.Mach = 1/self.Mach
+                self.setStaticMach()
+                guess = self.Ps
+                def f(Ps):
+                    self.Ps = Ps
+                    self.setStaticPs()
+                    return self.W/(self.rhos*self.Vflow)*144.-target_area
+
+                secant(f,  guess, x_min=0, x_max=Ps_M1)
+            
         elif self._mach_or_area == 3:
             self.setStaticPs()
 
