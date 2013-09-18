@@ -291,7 +291,7 @@ class CanteraFlowStation(VariableTree):
 
     def setStaticArea(self): 
         target_area = self.area
-        Ps_guess=self.Pt/(1 + (self.gamt-1)/2)**(self.gamt/(1-self.gamt)) #at mach 1
+        Ps_guess=self.Pt*(1 + (self.gamt-1)/2)**(self.gamt/(1-self.gamt)) #at mach 1
         def f(Ps):
             self.Ps = Ps
             self.setStaticPs()
@@ -310,10 +310,9 @@ class CanteraFlowStation(VariableTree):
         #if you want the supersonic one, just keep going with a little lower initial guess    
         if self.sub_or_super == "super":
             #jsg: wild guess of 1/M_subsonic
-            self.Mach = 1/self.Mach
-            self.setStaticMach()
-            guess = self.Ps
-            secant(f,  guess, x_min=0, x_max=Ps_M1)
+            mach_guess = 1/self.Mach
+            Ps_guess=self.Pt*(1 + (self.gamt-1)/2*mach_guess**2)**(self.gamt/(1-self.gamt))
+            secant(f, Ps_guess, x_min=0, x_max=Ps_M1)
 
     #determine which static calc to use
     def setStatic(self):
