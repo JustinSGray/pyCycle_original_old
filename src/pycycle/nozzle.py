@@ -103,15 +103,9 @@ class Nozzle(CycleComponent):
             # between curves 4 and c
             elif Fl_ref.Ps < PsSubsonic and Fl_ref.Ps >= PsShock:
                 self.switchRegime = "NORMAL_SHOCK"
+                Fl_O.sub_or_super = "sub"
+                Fl_O.Ps = Fl_ref.Ps
 
-                Msuper = 1.5
-                def F( MN ):
-                    PtExit = self.shockPR( MN, fs_throat.gams) * fs_throat.Pt
-                    Fl_O.setTotalTP( fs_throat.Tt, PtExit )
-                    Fl_O.sub_or_super = "sub"
-                    Fl_O.area = self.Aexit_des
-                    return (Fl_O.Ps - Fl_ref.Ps)/Fl_ref.Ps
-                Fl_O.Mach = secant( F, Msuper )
 
             # between curves c and 5
             elif Fl_ref.Ps < PsShock and Fl_ref.Ps > PsSupersonic:
