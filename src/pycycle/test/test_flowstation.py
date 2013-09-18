@@ -60,19 +60,24 @@ class FlowStationTestCase(unittest.TestCase):
         self.assertAlmostEqual(diffs, .092609, places=4)          
         
     def test_set_WAR(self):
-        self.fs.WAR = 0.02
-        self.fs.setTotalTP(1000, 15) 
-
+        self.fs.setWAR( 0.02 );
+        self.fs.setTotalTP(1000, 15); 
         self.assertAlmostEqual(self.fs.Pt, 15., places=2)
         self.assertAlmostEqual(self.fs.Tt, 1000, places=2)
         self.assertAlmostEqual(self.fs.WAR, 0.02, places=2)
         self.assertAlmostEqual(self.fs.FAR, 0, places=2)
-
+        self.assertAlmostEqual(self.fs.ht, -2.34500, places=2)
+        
     def test_setDryAir(self):
         self.fs.setDryAir()
+        self.fs.setTotalTP(1000, 15); 
+        self.assertAlmostEqual(self.fs.Pt, 15., places=2)
+        self.assertAlmostEqual(self.fs.Tt, 1000, places=2)
+        self.assertAlmostEqual(self.fs.WAR, 0.0, places=2)
+        self.assertAlmostEqual(self.fs.FAR, 0, places=2)
+        self.assertAlmostEqual(self.fs.ht, 111.124, places=2)
         self.assertAlmostEqual(self.fs.WAR, 0, places=2)
         self.assertAlmostEqual(self.fs.FAR, 0, places=2)
-        
 
 class TestBurn(unittest.TestCase): 
     def setUp(self):
@@ -85,8 +90,7 @@ class TestBurn(unittest.TestCase):
 
     #all test cases use the same checks here, so just re-use
     def _assert(self): 
-        #print (self.fs._flow)  
-        self.assertAlmostEqual(self.fs.W, 102.5, places=2)
+        #print (self.fs._flow)  self.assertAlmostEqual(self.fs.W, 102.5, places=2)
         self.assertAlmostEqual(self.fs.FAR, .025, places=2)   
         self.assertAlmostEqual(self.fs.Pt, 400, places=2)
         self.assertAlmostEqual(self.fs.Tt, 2669.69, places=0)
@@ -98,7 +102,18 @@ class TestBurn(unittest.TestCase):
     def test_burn(self):         
         self._assert()
         
-
+    def test_add( self ):
+        self.fs1 = CanteraFlowStation()
+        self.fs1.setDryAir()
+        self.fs1.setTotalTP(1100, 40)
+        self.fs1.W = 10. 
+        self.fs.add( self.fs1 );
+        self.assertAlmostEqual(self.fs.W, 112.5, places=2)
+        self.assertAlmostEqual(self.fs.FAR, .02272, places=4)   
+        self.assertAlmostEqual(self.fs.Pt, 400, places=2)
+        self.assertAlmostEqual(self.fs.Tt, 2507.74, places=0)
+        self.assertAlmostEqual(self.fs.ht, 108.05, places=1) 
+  
 class TestStatics(unittest.TestCase): 
     def setUp(self):
         self.fs = CanteraFlowStation()

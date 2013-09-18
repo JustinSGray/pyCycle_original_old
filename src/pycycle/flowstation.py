@@ -194,10 +194,14 @@ class CanteraFlowStation(VariableTree):
     #mix enthalpies and keep pressure and this stations value
     def add(self, FS2):
         temp =""
-        for i in range(0, len(reactants)):
+        for i in range(0, len(self._species)):
                 self._species[i]=(self.W*self._species[i]+FS2.W*FS2._species[i])/(self.W + FS2.W)
-                temp=temp+reactants[i]+":"+str(self._species[i])+" "
-        self._flow.setMassFractions(temp)        
+                temp=temp+self.reactants[i]+":"+str(self._species[i])+" "
+        self._flow.setMassFractions(temp)      
+        air1 = self.W * ( 1. / ( 1. + self.FAR + self.WAR ));
+        air2 = FS2.W *( 1. / ( 1 + FS2.WAR + FS2.FAR ));
+        self.FAR = ( air1 * self.FAR + air2*FS2.FAR )/( air1 + air2 );
+        self.WAR = ( air1 * self.WAR + air2*FS2.WAR )/( air1 + air2 );
         self.ht=(self.W*self.ht+FS2.W+FS2.ht)/(self.W+FS2.W)
         self._flow.setMassFractions(temp)
         self.W=self.W +(FS2.W)
