@@ -254,25 +254,14 @@ class CanteraFlowStation(VariableTree):
        
     #set the statics based on Mach
     def setStaticMach(self):
-        MachTemp=0
-        self.Ps=self.Pt*(1 + (self.gamt-1)/2*self.Mach**2)**(self.gamt/(1-self.gamt))
+        mach_target = self.Mach
         def f(Ps):
             self.Ps=Ps
-            self._flowS=self._flow 
-            self._flowS.set(S=self.s/0.000238845896627, P=self.Ps*6894.75729)
-            self._flowS.equilibrate('SP')
-            self.Ts=self._flowS.temperature()*9./5.
-            self.rhos=self._flowS.density()*.0624
-            self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
-            self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
-            Vson=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
-            self.Vflow=math.sqrt(778.169*32.1740*2*(self.ht-self.hs))
-            MachTemp=self.Vflow / Vson
-            return self.Mach - MachTemp
+            self.setStaticPs()
+            return self.Mach - mach_target
 
-        guess = self.Pt*.9
-        self.Ps = secant(f, guess, x_min=0, x_max=self.Pt)
-        self.area= self.W / (self.rhos*self.Vflow)*144. 
+        Ps_guess = self.Pt*(1 + (self.gamt-1)/2*mach_target**2)**(self.gamt/(1-self.gamt))
+        secant(f, Ps_guess, x_min=0, x_max=self.Pt)
 
 
     #set the statics based on pressure
