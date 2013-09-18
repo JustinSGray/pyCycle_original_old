@@ -1,10 +1,12 @@
 
 import unittest
 
-from openmdao.main.api import set_as_top
+from openmdao.main.api import set_as_top, Assembly, Run_Once
+from openmdao.lib.drivers.api import BroydenSolver
 from openmdao.util.testutil import assert_rel_error
 
-from pycycle import nozzle, flowstation
+from pycycle.api import Nozzle, FlowStart
+from pycycle import flowstation 
 
 TOL = 0.001
 
@@ -12,7 +14,7 @@ class NozzleTestCaseResonable(unittest.TestCase):
 
     def setUp(self): 
 
-        self.comp = set_as_top(nozzle.Nozzle())
+        self.comp = set_as_top(Nozzle())
 
         fs = flowstation.CanteraFlowStation()
         fs.W = 100.
@@ -115,18 +117,7 @@ class NozzleTestCaseResonable(unittest.TestCase):
         assert_rel_error(self,self.comp.Fl_O.Tt, 700., TOL)
         assert_rel_error(self, self.comp.Fl_O.Ps, 37.0, TOL)
         assert_rel_error(self, self.comp.Fl_O.Mach, 0.662, TOL)
-
-        # TODO: set W = 96.03, MN throat = 0.793, MN exit = 0.607
-        '''
-        comp.Fl_ref.setTotalTP( 518.67, 39.0 )
-        comp.run()
-        self.assertEqual(comp.switchRegime,'UNCHOKED')
         
-        # set W = 80.80, MN throat = 0.562, MN exit = 0.470
-        comp.Fl_ref.setTotalTP( 518.67, 43.0 )
-        comp.run()
-        self.assertEqual(comp.switchRegime,'UNCHOKED')
-        '''
 
     def test_nozzle_perfect_expand(self): 
         self.comp.Fl_ref.setTotalTP( 518.67, 14.99 )
@@ -134,10 +125,64 @@ class NozzleTestCaseResonable(unittest.TestCase):
         self.assertEqual(self.comp.switchRegime,'PERFECTLY_EXPANDED')
 
 
+class NozzleTestCaseMassFlowIter(unittest.TestCase): 
+
+    def test_mass_flow_iter(self):
+
+        a = set_as_top(Assembly())
+        start = a.add('start', FlowStart())
+        ref = a.add('ref', FlowStart())
+        nozzle = a.add('nozzle', Nozzle())
+
+        
+        start.W = 100.
+        start.Tt = 700.
+        start.Pt = 50.0
+        start.Mach = 0.40
+
+        ref.W = 1.0
+        ref.Tt = 518.67
+        ref.Pt = 15.0 
+        ref.Mach = 0.0
+
+        a.connect('start.Fl_O','nozzle.Fl_I')
+        a.connect('ref.Fl_O','nozzle.Fl_ref')
+
+        a.add('design', Run_Once())
+        a.design.workflow.add(['start','ref','nozzle'])
+        a.design.add_event('start.design')
+        a.design.add_event('ref.design')
+        a.design.add_event('nozzle.design')
+
+        a.design.run()
+
+        a.add('off_design', BroydenSolver())
+        a.off_design.workflow.add(['start','ref','nozzle'])
+        a.off_design.add_parameter('start.W',low=-1e15,high=1e15)
+        a.off_design.add_constraint('nozzle.WqAexit=nozzle.WqAexit_dmd')
+
+
+        TOL = .001
+    
+        ref.Pt = 39.0
+        a.off_design.run()
+        self.assertEqual(nozzle.switchRegime,'UNCHOKED')
+        assert_rel_error(self, nozzle.Fl_O.W, 96.03, TOL)
+        assert_rel_error(self, nozzle.Fl_O.Mach, 0.607, TOL)
+        
+        # set W = 80.80, MN throat = 0.562, MN exit = 0.470
+        ref.Pt = 43.0 
+        a.off_design.run()
+        self.assertEqual(nozzle.switchRegime,'UNCHOKED')
+        assert_rel_error(self, nozzle.Fl_O.W, 80.80, TOL)
+        assert_rel_error(self, nozzle.Fl_O.Mach, 0.470, TOL)
+
+
+
 class NozzleTestCaseVeryLowTemp(unittest.TestCase):
 
     def test_nozzle_very_low_temperatures(self): 
-        comp = set_as_top(nozzle.Nozzle())
+        comp = set_as_top(Nozzle())
 
         fs = flowstation.CanteraFlowStation()
         fs.W = .639
@@ -162,6 +207,7 @@ class NozzleTestCaseVeryLowTemp(unittest.TestCase):
         assert_rel_error(self,comp.Fl_O.Mach, 2.7092, TOL)
         assert_rel_error(self,comp.Fl_O.area, 264.204, TOL)
         assert_rel_error(self,comp.Fl_O.rhos, .000177443, TOL)
+        assert_rel_error(self,comp.Fg, 38.98, TOL)
 
         #off design calcs
         assert_rel_error(self,comp.Fl_O.W, .639, TOL)

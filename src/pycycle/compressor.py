@@ -17,13 +17,13 @@ class Compressor(CycleComponent):
     hub_to_tip = Float(.4, iotype="in", desc="ratio of hub radius to tip radius")
     op_slope = Float(.85, iotype="in", desc="")
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor")
+    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor", copy=None)
 
     PR = Float(iotype="out", desc="pressure ratio at operating conditions")
     eff = Float(iotype="out", desc="adiabatic efficiency at the operating condition")
     eff_poly = Float(iotype="out", desc="polytropic efficiency at the operating condition")
     pwr = Float(iotype="out", units="hp", desc="power required to run the compressor at the operating condition")
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor")
+    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor", copy=None)
     tip_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
     hub_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
 

@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree, Enum
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation, secant
+from pycycle.flowstation import FlowStation, CanteraFlowStation
 from pycycle.cycle_component import CycleComponent
 
 
@@ -13,18 +13,25 @@ class Nozzle(CycleComponent):
     Fl_ref = FlowStation(iotype="in", desc="Flowstation with reference exit conditions")
 
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to nozzle")
+    dPqP = Float(0, iotype="in", desc="ratio of change in total pressure to incomming total pressure")
     
     Fl_O = FlowStation(iotype="out", desc="outgoing air stream from nozzle")
-    Athroat_dmd = Float(iotype="out", desc="demand throat area for the nozzle at the operating condition")
+    Athroat_dmd = Float(iotype="out", desc="demand throat area for the nozzle at the operating condition.")
     Athroat_des = Float(iotype="out", desc="nozzle throat area at the design condition")
     Aexit_des = Float(iotype="out", desc="nozzle exit area at the design condition")
     PsSubsonic = Float(iotype="out", desc="back pressure corresponding to subsonic expansion")
     PsSupersonic = Float(iotype="out", desc="back pressure corresponding to supersonic expansion")
     PsShock = Float(iotype="out", desc="back pressure corresponding to a normal shock at the nozzle exit")
+    Fg = Float(iotype="out", desc="gross thrust from nozzle", units="lbf")
+    PR = Float(iotype="out", desc="ratio between total and static pressures at the nozzle exit")
+    AR = Float(iotype="out", desc="ratio of exit area to throat area")
+
+    #used for mass flow balance iterations
+    WqAexit = Float(iotype="out", desc="mass flow per unit area at operating condition", units="lbm/(s*inch**2)")
+    WqAexit_dmd = Float(iotype="out", desc="demand mass flow per unit area at operating condition", units="lbm/(s*inch**2)")
 
     switchRegime = Enum(('UNCHOKED', 'NORMAL_SHOCK', 'UNDEREXPANDED', 'PERFECTLY_EXPANDED' ,'OVEREXPANDED'), 
         iotype="out", desc="nozzle operating regime")
-
 
 
     def shockPR(self, mach, gamma):
@@ -45,16 +52,17 @@ class Nozzle(CycleComponent):
         fs_exitIdeal = CanteraFlowStation()
 
         fs_throat.W = Fl_I.W
-        fs_throat.setTotalTP( Fl_I.Tt, Fl_I.Pt )
+        Pt_out = (1-self.dPqP)*Fl_I.Pt
+        fs_throat.setTotalTP( Fl_I.Tt, Pt_out )
         fs_throat.Mach = 1.0
         self.Athroat_dmd = fs_throat.area
 
         fs_exitIdeal.W = Fl_I.W
-        fs_exitIdeal.setTotalTP( Fl_I.Tt, Fl_I.Pt )
+        fs_exitIdeal.setTotalTP( Fl_I.Tt, Pt_out )
         fs_exitIdeal.Ps = Fl_ref.Ps
 
         Fl_O.W = Fl_I.W
-        Fl_O.setTotalTP( Fl_I.Tt, Fl_I.Pt )
+        Fl_O.setTotalTP( Fl_I.Tt, Pt_out )
         Fl_O.Mach = fs_exitIdeal.Mach
 
         if self.run_design: 
@@ -123,9 +131,17 @@ class Nozzle(CycleComponent):
             if abs(Fl_ref.Ps - PsSupersonic)/Fl_ref.Ps < .001: 
                 self.switchRegime = "PERFECTLY_EXPANDED"
 
-            self.PsSubsonic = PsSubsonic
-            self.PsSupersonic = PsSupersonic
-            self.PsShock = PsShock
+        self.Fg = Fl_O.W*Fl_O.Vflow/32.174 + Fl_O.area*(Fl_O.Ps-Fl_ref.Ps)
+        self.PR = fs_throat.Pt/Fl_O.Ps
+        self.AR = Fl_O.area/fs_throat.area
+        
+        self.WqAexit = Fl_I.W/self.Athroat_des
+        self.WqAexit_dmd = Fl_I.W/self.Athroat_dmd
+
+        if self.switchRegime == "UNCHOKED": 
+            self.WqAexit = Fl_I.W/Fl_ref.Ps
+            self.WqAexit_dmd = Fl_I.W/Fl_O.Ps
+
                 
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
