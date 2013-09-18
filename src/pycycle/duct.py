@@ -9,8 +9,8 @@ class Duct(CycleComponent):
     """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
     to a slower mach number and larger area"""
 
-    dPqP = Float(1.000, iotype="in", desc="pressure differential as a fraction of incomming pressure")
-    Q_dot = Float(0.00, iotype="in", units="Btu/s", desc="heat flow rate into (positive) or out of (negative) the air")
+    dPqP = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")
+    Q_dot = Float(0.0, iotype="in", units="Btu/s", desc="heat flow rate into (positive) or out of (negative) the air")
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
 
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor")
