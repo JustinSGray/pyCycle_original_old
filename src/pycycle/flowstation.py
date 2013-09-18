@@ -291,7 +291,7 @@ class CanteraFlowStation(VariableTree):
 
     def setStaticArea(self): 
         target_area = self.area
-        Ps_guess=self.Pt*(1 + (self.gamt-1)/2)**(self.gamt/(1-self.gamt)) #at mach 1
+        Ps_guess=self.Pt/(1 + (self.gamt-1)/2)**(self.gamt/(1-self.gamt)) #at mach 1
         def f(Ps):
             self.Ps = Ps
             self.setStaticPs()
