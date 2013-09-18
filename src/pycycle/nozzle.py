@@ -77,14 +77,7 @@ class Nozzle(CycleComponent):
 
             # Find supersonic solution, curve 5
             Fl_O.sub_or_super = "super"
-            PsOut = Fl_ref.Ps
-            def F( Ps ):
-                Fl_O.Ps = Ps
-                return Fl_O.area - self.Aexit_des
-            Fl_O.Ps = secant( F, PsOut, x_min=0, x_max=Fl_O.Pt )
-            #you might find the sub-sonic solution, so try again
-            if Fl_O.Mach < 1: 
-                Fl_O.Ps = secant( F, Fl_O.Ps*.5, x_min=0, x_max=Fl_O.Pt )
+            Fl_O.area = self.Aexit_des
             MachSupersonic = Fl_O.Mach
             PsSupersonic = Fl_O.Ps
 
