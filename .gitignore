@@ -2,3 +2,4 @@
 *.pyc
 *.xml
 openmdao_log.txt
+build/

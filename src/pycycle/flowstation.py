@@ -27,8 +27,8 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
         if abs(dx) < TOL * (1 + abs(x0)): 
             return x0 - dx
         if x0-dx < x_min: 
-            x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
-            #x1, x0 = x0, (x_max+x0)/2
+            #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
+            x1, x0 = x0, (x_max+x0)/2
         elif x0-dx > x_max: 
             x1, x0 = x0, (x_max+x0)/2
         else:    
@@ -297,6 +297,7 @@ class CanteraFlowStation(VariableTree):
         def f(Ps):
             self.Ps = Ps
             self.setStaticPs()
+            #print "TEST", self.Ps, self.Pt
             return self.W/(self.rhos*self.Vflow)*144.-target_area
         secant(f,  guess, x_min=0, x_max=self.Pt)
 
