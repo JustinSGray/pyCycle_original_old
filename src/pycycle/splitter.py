@@ -23,7 +23,6 @@ class Splitter(CycleComponent):
         Fl_I = self.Fl_I
         Fl_O1 = self.Fl_O1
         Fl_O2 = self.Fl_O2
-        print Fl_I.Tt, Fl_I.Pt
         Fl_O1.setTotalTP(Fl_I.Tt, Fl_I.Pt)
         Fl_O2.setTotalTP(Fl_I.Tt, Fl_I.Pt)
         Fl_O1.W = Fl_I.W/(self.BPR_des+1)
