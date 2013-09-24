@@ -72,7 +72,6 @@ class Compressor(CycleComponent):
         delta_s = Fl_O.s - Fl_I.s
         self.eff_poly = C/(C+delta_s)
         self.pwr = Fl_I.W*(Fl_O.ht - Fl_I.ht) * 1.4148532 #btu/s to hp 
-
         self.tip_radius = (Fl_O.area/math.pi/(1-self.hub_to_tip**2))**.5
         self.hub_radius = self.hub_to_tip*self.tip_radius
 

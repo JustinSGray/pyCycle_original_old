@@ -28,7 +28,7 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
             return x0 - dx
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
-            x1, x0 = x0, (x_max+x0)/2
+            x1, x0 = x0, (x_min+x0)/2
         elif x0-dx > x_max: 
             x1, x0 = x0, (x_max+x0)/2
         else:    
@@ -43,26 +43,26 @@ class CanteraFlowStation(VariableTree):
 
     reactants=["Air", "H2O"]
 
-    ht=Float(0.0, desc='total enthalpy', unit='Btu/lbm')
-    Tt=Float(0.0, desc='total temperature', unit='R')
-    Pt=Float(0.0, desc='total pressure', unit='lbf/in**2')
-    rhot=Float(0.0, desc='total density', unit='lbm/ft**3') 
-    gamt=Float(0.0, desc='total gamma', unit='') 
-    s =Float(0.0, desc='entropy', unit='Btu/lbm-R')
-    W =Float(0.0, desc='weight flow', unit='lbm/s') 
-    FAR =Float(0.0, desc='fuel to air ratio', unit='') 
-    WAR =Float(0.0, desc='water to air ratio', unit='') 
-    hs=Float(0.0, desc='static enthalpy', unit='Btu/lbm')
-    Ts=Float(0.0, desc='static temperature', unit='R')
-    Ps=Float(0.0, desc='static pressure', unit='lbf/in**2')
-    rhos=Float(0.0, desc='static density', unit='lbm/ft**3')
-    gams=Float(0.0, desc='static gamma', unit='')    
-    Vflow =Float(0.0, desc='Velocity', unit='ft/s')   
-    Mach=Float(0.0, desc='Mach number', unit='')
-    area =Float(0.0, desc='flow area', unit='in**2') 
+    ht=Float(0.0, desc='total enthalpy', units='Btu/lbm')
+    Tt=Float(0.0, desc='total temperature', units='R')
+    Pt=Float(0.0, desc='total pressure', units='lbf/inch**2')
+    rhot=Float(0.0, desc='total density', units='lbm/ft**3') 
+    gamt=Float(0.0, desc='total gamma') 
+    s =Float(0.0, desc='entropy', units='Btu/(lbm*R)')
+    W =Float(0.0, desc='weight flow', units='lbm/s') 
+    FAR =Float(0.0, desc='fuel to air ratio') 
+    WAR =Float(0.0, desc='water to air ratio') 
+    hs=Float(0.0, desc='static enthalpy', units='Btu/lbm')
+    Ts=Float(0.0, desc='static temperature', units='R')
+    Ps=Float(0.0, desc='static pressure', units='lbf/inch**2')
+    rhos=Float(0.0, desc='static density', units='lbm/ft**3')
+    gams=Float(0.0, desc='static gamma')    
+    Vflow =Float(0.0, desc='Velocity', units='ft/s')   
+    Mach=Float(0.0, desc='Mach number')
+    area =Float(0.0, desc='flow area', units='inch**2') 
     sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
     
-    Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
+    Wc = Float(0.0, desc='corrected weight flow', units='lbm/s') 
 
 
     #intialize station        
@@ -264,7 +264,7 @@ class CanteraFlowStation(VariableTree):
             self.setStaticPs()
             return self.Mach - mach_target
 
-        Ps_guess = self.Pt*(1 + (self.gamt-1)/2*mach_target**2)**(self.gamt/(1-self.gamt))
+        Ps_guess = self.Pt*(1 + (self.gamt-1)/2*mach_target**2)**(self.gamt/(1-self.gamt))*.9
         secant(f, Ps_guess, x_min=0, x_max=self.Pt)
 
 
@@ -297,7 +297,6 @@ class CanteraFlowStation(VariableTree):
         def f(Ps):
             self.Ps = Ps
             self.setStaticPs()
-            #print "TEST", self.Ps, self.Pt
             return self.W/(self.rhos*self.Vflow)*144.-target_area
         secant(f,  guess, x_min=0, x_max=self.Pt)
 
@@ -339,9 +338,16 @@ class CanteraFlowStation(VariableTree):
     #UPDGRAEDE TO USE LOOPS
     def setStaticTsPsMN(self, Ts, Ps, MN): 
         self._trigger=1 
+
         self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
         self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
         self.setTotalTP(self.Tt, self.Pt)
+
+        #do this once more beacause gamt changed... very crude iteration
+        self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
+        self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
+        self.setTotalTP(self.Tt, self.Pt)
+
         self._trigger=1
         self.Mach=MN 
         self.setStaticMach()
