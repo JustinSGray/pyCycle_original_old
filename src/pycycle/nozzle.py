@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree, Enum
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStation, AirFlowStation
 from pycycle.cycle_component import CycleComponent
 
 
@@ -48,8 +48,8 @@ class Nozzle(CycleComponent):
         Fl_O = self.Fl_O
         Fl_ref = self.Fl_ref
 
-        fs_throat = CanteraFlowStation()
-        fs_exitIdeal = CanteraFlowStation()
+        fs_throat = AirFlowStation()
+        fs_exitIdeal = AirFlowStation()
 
         fs_throat.W = Fl_I.W
         Pt_out = (1-self.dPqP)*Fl_I.Pt

@@ -1,13 +1,13 @@
 
 import unittest
 
-from pycycle.flowstation import CanteraFlowStation
+from pycycle.flowstation import AirFlowStation
 
 class FlowStationTestCase(unittest.TestCase):
 
     def setUp(self): 
         """Initialization function called before every test function""" 
-        self.fs = CanteraFlowStation()
+        self.fs = AirFlowStation()
         self.fs.W = 100
         self.fs.setDryAir()
         self.fs.setTotalTP(518, 15)
@@ -20,7 +20,7 @@ class FlowStationTestCase(unittest.TestCase):
 
         #print "TESTING"
 
-        self.new_fs = CanteraFlowStation()
+        self.new_fs = AirFlowStation()
 
         self.new_fs.copy_from(self.fs)
 
@@ -81,7 +81,7 @@ class FlowStationTestCase(unittest.TestCase):
 
 class TestBurn(unittest.TestCase): 
     def setUp(self):
-        self.fs = CanteraFlowStation()
+        self.fs = AirFlowStation()
         self.fs.setDryAir()
         self.fs.setTotalTP(1100, 400)
         self.fs.W = 100.
@@ -103,7 +103,7 @@ class TestBurn(unittest.TestCase):
         self._assert()
         
     def test_add( self ):
-        self.fs1 = CanteraFlowStation()
+        self.fs1 = AirFlowStation()
         self.fs1.setDryAir()
         self.fs1.setTotalTP(1100, 40)
         self.fs1.W = 10. 
@@ -116,7 +116,7 @@ class TestBurn(unittest.TestCase):
   
 class TestStatics(unittest.TestCase): 
     def setUp(self):
-        self.fs = CanteraFlowStation()
+        self.fs = AirFlowStation()
         self.fs.W = 100.
         self.fs.setDryAir()
         self.fs.setTotalTP(1100, 400)      

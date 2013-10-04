@@ -1,4 +1,4 @@
-__all__ = ['CanteraFlowStation']
+__all__ = ['AirFlowStation']
 
 from os.path import dirname, join
 
@@ -39,7 +39,7 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
     return x0
 
 
-class CanteraFlowStation(VariableTree):
+class AirFlowStation(VariableTree):
 
     reactants=["Air", "H2O"]
 
@@ -67,7 +67,7 @@ class CanteraFlowStation(VariableTree):
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
-        super(CanteraFlowStation, self).__init__(*args,**kwargs)
+        super(AirFlowStation, self).__init__(*args,**kwargs)
 
         #properties file path
         _dir = dirname(pycycle.__file__)
@@ -357,4 +357,4 @@ class CanteraFlowStation(VariableTree):
 #variable class used in components
 class FlowStation(VarTree): 
     def __init__(self,*args,**metadata): 
-        super(FlowStation,self).__init__(CanteraFlowStation(), *args, **metadata)
+        super(FlowStation,self).__init__(AirFlowStation(), *args, **metadata)
