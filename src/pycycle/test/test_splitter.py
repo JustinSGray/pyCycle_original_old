@@ -11,7 +11,7 @@ class CompressorTestCase(unittest.TestCase):
     def setUp(self): 
         self.comp = set_as_top(splitter.Splitter())
 
-        self.fs = flowstation.CanteraFlowStation()
+        self.fs = flowstation.AirFlowStation()
         self.fs.W = 3.48771299
         self.fs.setTotalTP(630.74523, 0.0271945)
         self.fs.Mach = 1
