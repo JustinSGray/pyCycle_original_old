@@ -48,6 +48,8 @@ class AirFlowStation(VariableTree):
     Pt=Float(0.0, desc='total pressure', units='lbf/inch**2')
     rhot=Float(0.0, desc='total density', units='lbm/ft**3') 
     gamt=Float(0.0, desc='total gamma') 
+    Cp = Float(0.0, desc='Specific heat at constant pressure', units='Btu/(lbm*degR)')
+    Cv = Float(0.0, desc='Specific heat at constant volume', units='Btu/(lbm*degR)')
     s =Float(0.0, desc='entropy', units='Btu/(lbm*R)')
     W =Float(0.0, desc='weight flow', units='lbm/s') 
     FAR =Float(0.0, desc='fuel to air ratio') 
@@ -61,7 +63,7 @@ class AirFlowStation(VariableTree):
     Mach=Float(0.0, desc='Mach number')
     area =Float(0.0, desc='flow area', units='inch**2') 
     sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
-    
+
     Wc = Float(0.0, desc='corrected weight flow', units='lbm/s') 
 
 
@@ -143,22 +145,27 @@ class AirFlowStation(VariableTree):
         self.setStatic()
         self._trigger=0
 
-        #set total conditions based on T an P
+    def _total_calcs(self): 
+        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
+        self.s=self._flow.entropy_mass()*0.000238845896627
+        self.rhot=self._flow.density()*.0624
+        self.Tt=self._flow.temperature()*9./5.
+        self.Cp = self._flow.cp_mass()/4186.8
+        self.Cv = self._flow.cv_mass()/4186.8
+        self.gamt=self.Cp/self.Cv
+        self._flowS=self._flow 
+        self.setStatic()
+        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)        
+        self._trigger=0
+
+    #set total conditions based on T an P
     def setTotalTP(self, Tin, Pin):
         self._trigger=1
         self.Tt=Tin
         self.Pt=Pin                
         self._flow.set(T=Tin*5./9., P=Pin*6894.75729)
         self._flow.equilibrate('TP')
-        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
-        self.s=self._flow.entropy_mass()*0.000238845896627
-        self.rhot=self._flow.density()*.0624
-        self.Tt=self._flow.temperature()*9./5.
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self._flowS=self._flow 
-        self.setStatic()
-        self._calculated_properties()
-        self._trigger=0
+        self._total_calcs()
 
     #set total conditions based on h and P
     def setTotal_hP(self, hin, Pin):
@@ -167,13 +174,7 @@ class AirFlowStation(VariableTree):
         self.Pt=Pin
         self._flow.set(H=hin/.0004302099943161011, P=Pin*6894.75729)
         self._flow.equilibrate('HP')
-        self.Tt=self._flow.temperature()*9./5.
-        self.s=self._flow.entropy_mass()*0.000238845896627    
-        self.rhot=self._flow.density()*.0624
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self.setStatic()
-        self._calculated_properties()
-        self._trigger=0
+        self._total_calcs()
 
     #set total condition based on S and P
     def setTotalSP(self, sin, Pin):
@@ -182,12 +183,7 @@ class AirFlowStation(VariableTree):
         self.Pt=Pin             
         self._flow.set(S=sin/0.000238845896627, P=Pin*6894.75729)
         self._flow.equilibrate('SP', loglevel=1)
-        self.Tt=self._flow.temperature()*9./5.
-        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
-        self.rhot=self._flow.density()*.0624
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self.setStatic()
-        self._calculated_properties()
+        self._total_calcs()
         self._trigger=0
 
     #add another station to this one
@@ -329,10 +325,6 @@ class AirFlowStation(VariableTree):
             
         elif self._mach_or_area == 3:
             self.setStaticPs()
-
-    def _calculated_properties(self): 
-        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)
-
 
     #set the statics based on Ts, Ps, and MN
     #UPDGRAEDE TO USE LOOPS
