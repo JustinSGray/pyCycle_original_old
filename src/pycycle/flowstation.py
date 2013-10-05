@@ -150,8 +150,8 @@ class AirFlowStation(VariableTree):
         self.s=self._flow.entropy_mass()*0.000238845896627
         self.rhot=self._flow.density()*.0624
         self.Tt=self._flow.temperature()*9./5.
-        self.Cp = self._flow.cp_mass()/4186.8
-        self.Cv = self._flow.cv_mass()/4186.8
+        self.Cp = self._flow.cp_mass()*2.388459e-4
+        self.Cv = self._flow.cv_mass()*2.388459e-4
         self.gamt=self.Cp/self.Cv
         self._flowS=self._flow 
         self.setStatic()
