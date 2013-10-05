@@ -26,7 +26,8 @@ from pycycle.cycle_component import CycleComponent
 
 
 class HeatExchanger(CycleComponent): 
-    """Calculates required Q to reach perscribed temperatures for a water-to-air heat exchanger"""
+    """Calculates output temperatures for water and air, and heat transfer, for a given 
+    water flow rate for a water-to-air heat exchanger"""
 
     #inputs
     W_cold = Float(.992, iotype="in", units = 'lbm/s', desc='Mass flow rate of cold fluid (water)') 
@@ -36,8 +37,8 @@ class HeatExchanger(CycleComponent):
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of heat exchanger")
     dPqP = Float(.1, iotype="in", desc="pressure differential as a fraction of incomming pressure")
     #State Vars
-    T_hot_out = Float(609.12, iotype="in", units = 'R', desc='Temp of air out of the heat exchanger')    
-    T_cold_out = Float(609.12, iotype="in", units = 'R', desc='Temp of water out of the heat exchanger') 
+    T_hot_out = Float(1400, iotype="in", units = 'R', desc='Temp of air out of the heat exchanger')    
+    T_cold_out = Float(518, iotype="in", units = 'R', desc='Temp of water out of the heat exchanger') 
     
 
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to heat exchanger", copy=None)
@@ -72,10 +73,15 @@ class HeatExchanger(CycleComponent):
             W_coldCpMin = Wh*Cp_hot
         self.Qmax = W_coldCpMin*(T_hot_in - T_cold_in)*1.4148532; #BTU/s to hp
 
+
         self.Qreleased = Wh*Cp_hot*(T_hot_in - T_hot_out)*1.4148532;
         self.Qabsorbed = W_cold*Cp_cold*(T_cold_out - T_cold_in)*1.4148532;
 
-        self.LMTD = ((T_hot_out-T_hot_in)+(T_cold_out-T_cold_in))/log((T_hot_out-T_cold_in)/(T_hot_in-T_cold_out))
+
+        try: 
+            self.LMTD = ((T_hot_out-T_hot_in)+(T_cold_out-T_cold_in))/log((T_hot_out-T_cold_in)/(T_hot_in-T_cold_out))
+        except ZeroDivisionError: 
+            self.LMTD = 0
 
         self.residual_qmax = self.Qreleased-self.effectiveness*self.Qmax
 
@@ -112,11 +118,9 @@ if __name__ == "__main__":
             fs.setTotalTP(1423.8, 0.302712118187) #R, psi
             fs.W = 1.0
             hx.Fl_I = fs
-
-            #initial guess
-            avg = ( hx.Fl_I.Tt + hx.T_cold_in )/2.
-            hx.T_cold_out = avg
-            hx.T_hot_out = avg  
+            hx.W_cold = 0.0
+            hx.T_hot_out = hx.Fl_I.Tt
+            hx.T_cold_out = hx.T_cold_in
 
             driver.workflow.add(['hx'])
 
@@ -124,18 +128,7 @@ if __name__ == "__main__":
     set_as_top(test)
     test.hx.design = True
 
-
-    #good values: 
-    #air:      Tin       Tout         Q      Q' 
-               #1423.8   539.94      327.22 335.1
-    #water:    Tin       Tout         Q      Q' 
-    #          518.67    749.96      327.22 335.1
-    print ""
     test.run()
-    print  "air:      Tin       Tout         Q      Q\' \n";
-    print "    {}    {}    {}    {}".format(test.hx.Fl_I.Tt, test.hx.T_hot_out, test.hx.Qreleased, test.hx.Qmax)
 
-    print 
-    print "water:    Tin       Tout         Q      Q\' \n";
-    print "    {}    {}    {}    {}".format(test.hx.T_cold_in, test.hx.T_cold_out, test.hx.Qabsorbed, test.hx.Qmax)
-    print " LMTD = {}  ".format(test.hx.LMTD)
+    print test.hx.W_cold, test.hx.T_hot_out, test.hx.Fl_I.Tt
+    
