@@ -32,7 +32,6 @@ class Inlet(CycleComponent):
 
 
 
-
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
 

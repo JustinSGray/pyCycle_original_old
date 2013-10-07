@@ -118,7 +118,7 @@ if __name__ == "__main__":
             fs.setTotalTP(1423.8, 0.302712118187) #R, psi
             fs.W = 1.0
             hx.Fl_I = fs
-            hx.W_cold = 0.0
+            hx.W_cold = .45
             hx.T_hot_out = hx.Fl_I.Tt
             hx.T_cold_out = hx.T_cold_in
 

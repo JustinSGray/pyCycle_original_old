@@ -1,4 +1,4 @@
-from splitter import Splitter
+from splitter import SplitterBPR, SplitterW
 from start import FlowStart, FlowStartStatic
 from inlet import Inlet
 from nozzle import Nozzle

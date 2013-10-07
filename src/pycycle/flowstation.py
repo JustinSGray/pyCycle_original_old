@@ -23,6 +23,8 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
         f1, f = f, f1
     count = 0
     while 1:
+        if abs(f-f1) < TOL: 
+            break 
         dx = f * (x0 - x1) / float(f - f1)      
         if abs(dx) < TOL * (1 + abs(x0)): 
             return x0 - dx
