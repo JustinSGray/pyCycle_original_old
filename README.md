@@ -59,9 +59,10 @@ an install from source. Don't be scared by the cantera source install though, co
 easy! It's only two steps. 
 
 1)Clone the repository to your local machine. If you want to clone ours: 
-    ```
+    
     git clone https://github.com/OpenMDAO-Plugins/pyCycle.git
-    ```
+    
+    
 Or you can fork it and clone that to your local machine. Either way... 
 
 2) cd into the pyCycle directory
