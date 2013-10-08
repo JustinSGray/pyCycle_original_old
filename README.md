@@ -60,5 +60,12 @@ easy! It's only two steps.
 
    #. Clone the repository to your local machine. If you want to clone ours: 
    ```
-   git clone 
+   git clone https://github.com/OpenMDAO-Plugins/pyCycle.git
+   ```
+   Or you can fork it and clone that to your local machine. Either way... 
+
+   #. cd into the pyCycle directory
+   ``` 
+   python setup.py develop
+   ```
 
