@@ -1,5 +1,6 @@
 *.log
 *.pyc
 *.xml
+*.egg-info
 openmdao_log.txt
 build/

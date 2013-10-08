@@ -22,8 +22,8 @@ but once you have homebrew installed and setup, here is the short version:
 
 
 ### Cantera
-In addition, this plugin requires the [Cantera](https://code.google.com/p/cantera/) package
-and python wrapper for it. You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
+In addition, this plugin requires [Cantera](https://code.google.com/p/cantera/) 
+and the python wrapper for it. You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
 or follow the instructions below for a bit easier route. 
 
 #### Windows
@@ -41,7 +41,7 @@ Assuming you've used homebrew to get OpenMDAO setup, then just use it to install
 
 
 #### Linux
-You're best bet is to follow the official instructions(http://cantera.github.io/docs/sphinx/html/compiling.html). 
+You're best bet is to follow the [official instructions](http://cantera.github.io/docs/sphinx/html/compiling.html). 
 
 
 # Installation
@@ -53,7 +53,7 @@ This will install the plugin, but you won't have access to the source in order t
     plugin install --github pycycle
 
 
-### Source install
+## Source install
 If you want to have access to the source and make changes to it while you're working then you should do 
 an install from source. Don't be scared by the cantera source install though, compared to that this is pretty 
 easy! It's only two steps. 
