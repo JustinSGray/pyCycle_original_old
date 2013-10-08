@@ -26,21 +26,21 @@ In addition, this plugin requires the [Cantera](https://code.google.com/p/canter
 and python wrapper for it. You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
 or follow the instructions below for a bit easier route. 
 
-### Windows
+#### Windows
 Cantera provides [pre-compiled](https://code.google.com/p/cantera/downloads/list) binaries 
 that are by far the easiest choice for windows. You should follow their instructions 
 for the best way to install it and make sure it works. 
 
 https://code.google.com/p/cantera/wiki/WindowsInstallation
 
-### Mac OS-X
-Assume you've used homebrew to get OpenMDAO setup, then just use it to install Cantera too! 
+#### Mac OS-X
+Assuming you've used homebrew to get OpenMDAO setup, then just use it to install Cantera too! 
 
 
     brew install cantera
 
 
-### Linux
+#### Linux
 You're best bet is to follow the official instructions(http://cantera.github.io/docs/sphinx/html/compiling.html). 
 
 
