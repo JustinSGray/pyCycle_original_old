@@ -58,14 +58,14 @@ If you want to have access to the source and make changes to it while you're wor
 an install from source. Don't be scared by the cantera source install though, compared to that this is pretty 
 easy! It's only two steps. 
 
-   #. Clone the repository to your local machine. If you want to clone ours: 
-   ```
-   git clone https://github.com/OpenMDAO-Plugins/pyCycle.git
-   ```
-   Or you can fork it and clone that to your local machine. Either way... 
+    #. Clone the repository to your local machine. If you want to clone ours: 
+    ```
+    git clone https://github.com/OpenMDAO-Plugins/pyCycle.git
+    ```
+    Or you can fork it and clone that to your local machine. Either way... 
 
-   #. cd into the pyCycle directory
-   ``` 
-   python setup.py develop
-   ```
+    #. cd into the pyCycle directory
+    ``` 
+    python setup.py develop
+    ```
 
