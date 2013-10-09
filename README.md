@@ -8,18 +8,18 @@ is the inclusion of a FlowStation variable that provides access to isentropic fl
 This is an OpenMDAO plugin, so we assume you have already installed a version of OpenMDAO. 
 
 ### Mac OS-X Tip
-    On OS-X it is strongly suggested that you setup Python, and other OpenMDAO pre-reqs with 
-    homebrew. You can follow these [detailed instructions](http://www.lowindata.com/2013/installing-scientific-python-on-mac-os-x/)
-    but once you have homebrew installed and setup, here is the short version: 
+On OS-X it is strongly suggested that you setup Python, and other OpenMDAO pre-reqs with 
+homebrew. You can follow these [detailed instructions](http://www.lowindata.com/2013/installing-scientific-python-on-mac-os-x/)
+but once you have homebrew installed and setup, here is the short version: 
 
 
-        brew install git
-        brew install python
-        brew install gfortran
-        pip install numpy
-        pip install scipy
-        brew install freetype
-        pip install matplotlib
+    brew install git
+    brew install python
+    brew install gfortran
+    pip install numpy
+    pip install scipy
+    brew install freetype
+    pip install matplotlib
 
 
 ### Cantera
