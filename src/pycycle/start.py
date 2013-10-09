@@ -17,7 +17,6 @@ class FlowStart(CycleComponent):
 
 
     def execute(self): 
-        print self.Pt
         self.Fl_O.setTotalTP(self.Tt, self.Pt)
         self.Fl_O.W = self.W
         self.Fl_O.Mach = self.Mach
