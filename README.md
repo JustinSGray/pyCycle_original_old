@@ -27,10 +27,15 @@ In addition, this plugin requires [Cantera](https://code.google.com/p/cantera/)
 and the python wrapper for it. You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
 or follow the instructions below for a bit easier route. 
 
+
+
 #### Windows
 Cantera provides [pre-compiled](https://code.google.com/p/cantera/downloads/list) binaries 
 that are by far the easiest choice for windows. You should follow their instructions 
 for the best way to install it and make sure it works. 
+
+But note that you need to install version 2.0.2 and **NOT** the 2.1 beta version. Get only the official 
+release version of it! 
 
 https://code.google.com/p/cantera/wiki/WindowsInstallation
 
