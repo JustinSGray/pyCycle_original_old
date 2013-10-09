@@ -10,7 +10,7 @@ class FlowStart(CycleComponent):
 
     W = Float(1, iotype="in", desc="mass flow rate", units="lbm/s")
     Pt = Float(14.7, iotype="in", desc="total pressure", units="psi")
-    Tt = Float(518, iotype="in", desc="total temperature", units="R")
+    Tt = Float(518, iotype="in", desc="total temperature", units="degR")
     Mach = Float(.1, iotype="in", desc="Mach Number")
 
     Fl_O = FlowStation(iotype="out", desc="outgoing flow at the specified conditions", copy=None)
@@ -25,7 +25,7 @@ class FlowStartStatic(CycleComponent):
 
     W = Float(1, iotype="in", desc="mass flow rate", units="lbm/s")
     Ps = Float(14.7, iotype="in", desc="total pressure", units="psi")
-    Ts = Float(518, iotype="in", desc="total temperature", units="R")
+    Ts = Float(518, iotype="in", desc="total temperature", units="degR")
     Mach = Float(.1, iotype="in", desc="Mach Number")
 
     Fl_O = FlowStation(iotype="out", desc="outgoing flow at the specified conditions", copy=None)
