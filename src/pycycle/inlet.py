@@ -14,6 +14,7 @@ class Inlet(CycleComponent):
 
     Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor", copy=None)
     Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor", copy=None)
+    F_ram = Float(iotype="out", desc="ram drag from the inlet", units="lbf")
 
 
     def execute(self): 
@@ -23,6 +24,8 @@ class Inlet(CycleComponent):
         Pt_out = Fl_I.Pt*self.ram_recovery
         Fl_O.setTotalTP(Fl_I.Tt, Pt_out)
         Fl_O.W = Fl_I.W
+
+        self.F_ram = Fl_I.W*Fl_I.Vflow/32.174 #lbf
 
         if self.run_design: 
             Fl_O.Mach = self.MNexit_des

@@ -64,6 +64,7 @@ class AirFlowStation(VariableTree):
     Vflow =Float(0.0, desc='Velocity', units='ft/s')   
     Mach=Float(0.0, desc='Mach number')
     area =Float(0.0, desc='flow area', units='inch**2') 
+    #mu = Float(0.0, desc='dynamic viscosity', units='lbm/(s*ft)')
     sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
 
     Wc = Float(0.0, desc='corrected weight flow', units='lbm/s') 
@@ -157,7 +158,8 @@ class AirFlowStation(VariableTree):
         self.gamt=self.Cp/self.Cv
         self._flowS=self._flow 
         self.setStatic()
-        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)        
+        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)    
+        #self.mu = self._flow.viscosity()*0.671968975    
         self._trigger=0
 
     #set total conditions based on T an P
