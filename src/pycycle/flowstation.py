@@ -46,7 +46,7 @@ class AirFlowStation(VariableTree):
     reactants=["Air", "H2O"]
 
     ht=Float(0.0, desc='total enthalpy', units='Btu/lbm')
-    Tt=Float(0.0, desc='total temperature', units='R')
+    Tt=Float(0.0, desc='total temperature', units='degR')
     Pt=Float(0.0, desc='total pressure', units='lbf/inch**2')
     rhot=Float(0.0, desc='total density', units='lbm/ft**3') 
     gamt=Float(0.0, desc='total gamma') 
@@ -57,7 +57,7 @@ class AirFlowStation(VariableTree):
     FAR =Float(0.0, desc='fuel to air ratio') 
     WAR =Float(0.0, desc='water to air ratio') 
     hs=Float(0.0, desc='static enthalpy', units='Btu/lbm')
-    Ts=Float(0.0, desc='static temperature', units='R')
+    Ts=Float(0.0, desc='static temperature', units='degR')
     Ps=Float(0.0, desc='static pressure', units='lbf/inch**2')
     rhos=Float(0.0, desc='static density', units='lbm/ft**3')
     gams=Float(0.0, desc='static gamma')    
