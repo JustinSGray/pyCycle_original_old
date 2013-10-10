@@ -62,6 +62,7 @@ class AirFlowStation(VariableTree):
     rhos=Float(0.0, desc='static density', units='lbm/ft**3')
     gams=Float(0.0, desc='static gamma')    
     Vflow =Float(0.0, desc='Velocity', units='ft/s')   
+    Vsonic=Float(0.0, desc='Speed of sound', units='ft/s')
     Mach=Float(0.0, desc='Mach number')
     area =Float(0.0, desc='flow area', units='inch**2') 
     #mu = Float(0.0, desc='dynamic viscosity', units='lbm/(s*ft)')
@@ -159,6 +160,8 @@ class AirFlowStation(VariableTree):
         self._flowS=self._flow 
         self.setStatic()
         self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)    
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+
         #self.mu = self._flow.viscosity()*0.671968975    
         self._trigger=0
 
@@ -277,9 +280,8 @@ class AirFlowStation(VariableTree):
         self.rhos=self._flowS.density()*.0624
         self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
         self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
-        Vson=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
-        self.Mach=self.Vflow / Vson
+        self.Mach=self.Vflow / self.Vsonic
         self.area= self.W / (self.rhos*self.Vflow)*144. 
 
     def setStaticArea(self): 

@@ -1,5 +1,5 @@
 from splitter import SplitterBPR, SplitterW
-from start import FlowStart, FlowStartStatic
+from start import FlowStart, FlowStartStatic, FlowStartStaticV
 from inlet import Inlet
 from nozzle import Nozzle
 from duct import Duct
