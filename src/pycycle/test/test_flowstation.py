@@ -3,11 +3,23 @@ import unittest
 
 from pycycle.flowstation import CanteraFlowStation
 
+fs = CanteraFlowStation()
+fs.add_reactant( ['N2', 'O2', 'AR', 'CO2', '', ''],[.7547, .232, .0128, 0.00046, 0., 0. ] )
+fs.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
+fs.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
+fs.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
+fs.add_reactant( ['C', 'H', '', '', '', ''], [.862,.138, 0., 0., 0., 0. ] )   
+fs.add_reactant( ['Jet-A(g)', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )   
+
+
 class FlowStationTestCase(unittest.TestCase):
 
     def setUp(self): 
         """Initialization function called before every test function""" 
         self.fs = CanteraFlowStation()
+        #self.fs.add_reactant( ['N2', 'O2', 'AR', 'CO2', '', ''],[.7547, .232, .0128, 0.00046, 0., 0. ] )
+        #self.fs.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
+        #self.fs.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
         self.fs.W = 100
         self.fs.setDryAir()
         self.fs.setTotalTP(518, 15)
@@ -31,10 +43,11 @@ class FlowStationTestCase(unittest.TestCase):
     def test_setTotalTP(self):
         self.assertAlmostEqual(self.fs.Pt, 15.0, places=2)
         self.assertAlmostEqual(self.fs.Tt, 518, places=2)
-        self.assertAlmostEqual(self.fs.ht, -6.32816, places=4) #Tom says the ht values will be different
+        self.assertAlmostEqual(self.fs.ht, -6.2274, places=4) #Tom says the ht values will be different
         self.assertAlmostEqual(self.fs.W, 100, places=2)
-        self.assertAlmostEqual(self.fs.rhot, .07812, places=4)
- 
+        self.assertAlmostEqual(self.fs.rhot, .07815, places=3)
+        self.assertAlmostEqual(self.fs.gamt, 1.401, places=3)
+
     def test_setTotal_hP(self):
         ht = self.fs.ht
         self.fs.setTotalTP(1000, 40) #just to move things around a bit
@@ -57,16 +70,16 @@ class FlowStationTestCase(unittest.TestCase):
         s = self.fs.s
         self.fs.setTotalTP(1000, 40)
         diffs = self.fs.s - s
-        self.assertAlmostEqual(diffs, .092609, places=4)          
+        self.assertAlmostEqual(diffs, .092609, places=4)        
         
     def test_set_WAR(self):
-        self.fs.setWAR( 0.02 );
+        self.fs.setWAR( 0.02 )
         self.fs.setTotalTP(1000, 15); 
         self.assertAlmostEqual(self.fs.Pt, 15., places=2)
         self.assertAlmostEqual(self.fs.Tt, 1000, places=2)
         self.assertAlmostEqual(self.fs.WAR, 0.02, places=2)
         self.assertAlmostEqual(self.fs.FAR, 0, places=2)
-        self.assertAlmostEqual(self.fs.ht, -2.34500, places=2)
+        self.assertAlmostEqual(self.fs.ht, -2.2500, places=2)
         
     def test_setDryAir(self):
         self.fs.setDryAir()
@@ -75,48 +88,59 @@ class FlowStationTestCase(unittest.TestCase):
         self.assertAlmostEqual(self.fs.Tt, 1000, places=2)
         self.assertAlmostEqual(self.fs.WAR, 0.0, places=2)
         self.assertAlmostEqual(self.fs.FAR, 0, places=2)
-        self.assertAlmostEqual(self.fs.ht, 111.124, places=2)
+        self.assertAlmostEqual(self.fs.ht, 111.225, places=2)
         self.assertAlmostEqual(self.fs.WAR, 0, places=2)
         self.assertAlmostEqual(self.fs.FAR, 0, places=2)
+
+
 
 class TestBurn(unittest.TestCase): 
     def setUp(self):
         self.fs = CanteraFlowStation()
+        #self.fs.add_reactant( ['N2', 'O2', 'AR', '', '', ''],[.7547, .232, .0126, 0., 0., 0. ] )
+        #self.fs.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
+
         self.fs.setDryAir()
         self.fs.setTotalTP(1100, 400)
-        self.fs.W = 100.
-        self.fs.add_reactant("Jet-A(g)")
-        self.fs.burn("Jet-A(g)", 2.5, -642)  
-
+        self.fs.W = 100
+ 
+        self.fs.burn(4,2.5, -642)  
+   
+        
     #all test cases use the same checks here, so just re-use
     def _assert(self): 
         #print (self.fs._flow)  self.assertAlmostEqual(self.fs.W, 102.5, places=2)
         self.assertAlmostEqual(self.fs.FAR, .025, places=2)   
         self.assertAlmostEqual(self.fs.Pt, 400, places=2)
-        self.assertAlmostEqual(self.fs.Tt, 2669.69, places=0)
-        self.assertAlmostEqual(self.fs.ht, 117.16, places=1) 
+        self.assertAlmostEqual(self.fs.Tt, 2669.72, places=0)
+        self.assertAlmostEqual(self.fs.ht, 117.26, places=1) 
         self.assertAlmostEqual(self.fs.rhot, .401845715, places=2)
         self.assertAlmostEqual(self.fs.W, 102.5, places=4)
-        self.assertAlmostEqual(self.fs.gamt, 1.293, places=3)
+        self.assertAlmostEqual(self.fs.gamt, 1.2935, places=3)
 
     def test_burn(self):         
         self._assert()
         
     def test_add( self ):
+       
         self.fs1 = CanteraFlowStation()
+ 
         self.fs1.setDryAir()
-        self.fs1.setTotalTP(1100, 40)
-        self.fs1.W = 10. 
+        self.fs1.setTotalTP(1000, 15)
+        self.fs1.W = 10.
+        self.fs1.setWAR( .02 )
         self.fs.add( self.fs1 );
         self.assertAlmostEqual(self.fs.W, 112.5, places=2)
         self.assertAlmostEqual(self.fs.FAR, .02272, places=4)   
         self.assertAlmostEqual(self.fs.Pt, 400, places=2)
-        self.assertAlmostEqual(self.fs.Tt, 2507.74, places=0)
-        self.assertAlmostEqual(self.fs.ht, 108.05, places=1) 
-  
+        self.assertAlmostEqual(self.fs.Tt, 2539.80, places=0)
+        self.assertAlmostEqual(self.fs.ht, 107.920, places=1)
+        self.assertAlmostEqual(self.fs.gamt, 1.2973, places=3)
+        
 class TestStatics(unittest.TestCase): 
     def setUp(self):
         self.fs = CanteraFlowStation()
+
         self.fs.W = 100.
         self.fs.setDryAir()
         self.fs.setTotalTP(1100, 400)      
