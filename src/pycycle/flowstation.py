@@ -99,20 +99,20 @@ class AirFlowStation(VariableTree):
         
     def add_reactant(self, reactants, splits ):
     
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][0] = reactants[0]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][1] = reactants[1]           
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][2] = reactants[2]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][3] = reactants[3]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][4] = reactants[4]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][5] = reactants[5]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][0] = reactants[0]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][1] = reactants[1]           
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][2] = reactants[2]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][3] = reactants[3]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][4] = reactants[4]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][5] = reactants[5]
  
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][0] = splits[0]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][1] = splits[1]    
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][2] = splits[2]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][3] = splits[3]   
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][4] = splits[4]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][5] = splits[5]   
-            CanteraFlowStation.numreacts = CanteraFlowStation.numreacts + 1
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][0] = splits[0]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][1] = splits[1]    
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][2] = splits[2]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][3] = splits[3]   
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][4] = splits[4]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][5] = splits[5]   
+            AirFlowStation.numreacts = AirFlowStation.numreacts + 1
 
     def _W_changed(self): 
         if self._trigger == 0:
@@ -144,7 +144,7 @@ class AirFlowStation(VariableTree):
             self.setStatic()
             self._trigger=0 
 
-    def setComp(self):
+    def _setComp(self):
  
  
         global reactantNames 
@@ -155,11 +155,11 @@ class AirFlowStation(VariableTree):
         compname    = ['', '', '', '', '', '', '', '', '', '', '', '']
         fract = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         numcurrent = 0;
-        for cName in range ( 0, CanteraFlowStation.numreacts ):
+        for cName in range ( 0, AirFlowStation.numreacts ):
             for cSpecies in range( 0, 6 ):
-                if CanteraFlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
-                   fract[numcurrent]=CanteraFlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
-                   compname[numcurrent] = CanteraFlowStation.reactantNames[cName][cSpecies];
+                if AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
+                   fract[numcurrent]=AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
+                   compname[numcurrent] = AirFlowStation.reactantNames[cName][cSpecies];
                    numcurrent = numcurrent+1;
     
   
@@ -188,7 +188,7 @@ class AirFlowStation(VariableTree):
         self._species[0]=1 
         self.WAR=0
         self.FAR=0
-        self.setComp()
+        self._setComp()
         self._trigger=0
    
     #set the compositon to air with water
@@ -198,7 +198,7 @@ class AirFlowStation(VariableTree):
         self.FAR=0
         self._species[0]=(1-WAR)/(1+WAR)
         self._species[1]=(WAR)/(1+WAR)
-        self.setComp()
+        self._setComp()
         self.setStatic()
         self._trigger=0
 
@@ -220,7 +220,7 @@ class AirFlowStation(VariableTree):
 
     #set total conditions based on T an P
     def setTotalTP(self, Tin, Pin):
-        self.setComp()    
+        self._setComp()    
         self._trigger=1
         self.Tt=Tin
         self.Pt=Pin                
@@ -230,7 +230,7 @@ class AirFlowStation(VariableTree):
 
     #set total conditions based on h and P
     def setTotal_hP(self, hin, Pin):
-        self.setComp()
+        self._setComp()
         self._trigger=1 
         self.ht=hin
         self.Pt=Pin
@@ -241,7 +241,7 @@ class AirFlowStation(VariableTree):
 
     #set total condition based on S and P
     def setTotalSP(self, sin, Pin):
-        self.setComp()
+        self._setComp()
         self._trigger=1
         self.s=sin
         self.Pt=Pin             
@@ -256,7 +256,7 @@ class AirFlowStation(VariableTree):
         temp =""
         for i in range(0, len(self._species)):
                 self._species[i]=(self.W*self._species[i]+FS2.W*FS2._species[i])/(self.W + FS2.W)
-        self.setComp()
+        self._setComp()
         air1 = self.W * ( 1. / ( 1. + self.FAR + self.WAR ))
         air2 = FS2.W *( 1. / ( 1 + FS2.WAR + FS2.FAR ))
         self.FAR = ( air1 * self.FAR + air2*FS2.FAR )/( air1 + air2 )
@@ -303,7 +303,7 @@ class AirFlowStation(VariableTree):
         self.ht= (flow_1 * self.ht + Wfuel * hfuel)/ self.W
         air1=flow_1 * (1. / (1. + self.FAR + self.WAR))
         self.FAR=(air1 * self.FAR + Wfuel)/(air1)
-        self.setComp() 
+        self._setComp() 
         self._flow.set(T=2660*5/9, P=self.Pt*6894.75729)
         self._flow.equilibrate('TP')
         self._flow.set(H=self.ht/0.0004302099943161011, P=self.Pt*6894.75729)
