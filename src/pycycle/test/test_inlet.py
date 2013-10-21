@@ -14,7 +14,7 @@ class StartTestCase(unittest.TestCase):
         comp.ram_recovery = 1.0
         comp.MNexit_des = .6
 
-        fs = flowstation.CanteraFlowStation()
+        fs = flowstation.AirFlowStation()
         fs.W = 1.080
         fs.setTotalTP(630.75, 0.0272)
         fs.Mach = 1.0

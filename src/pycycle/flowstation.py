@@ -1,4 +1,4 @@
-__all__ = ['CanteraFlowStation']
+__all__ = ['AirFlowStation']
 
 from os.path import dirname, join
 
@@ -22,13 +22,16 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
         x1, x0 = x0, x1 
         f1, f = f, f1
     count = 0
-    while count < 100:
+
+    while 1:
+        if abs(f-f1) < TOL: 
+            break 
         dx = f * (x0 - x1) / float(f - f1)      
         if abs(dx) < TOL * (1 + abs(x0)): 
             return x0 - dx
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
-            x1, x0 = x0, (x_max+x0)/2
+            x1, x0 = x0, (x_min+x0)/2
         elif x0-dx > x_max: 
             x1, x0 = x0, (x_max+x0)/2
         else:    
@@ -39,40 +42,44 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
     return x0
 
 
-class CanteraFlowStation(VariableTree):
+class AirFlowStation(VariableTree):
 
-  
     reactants = []
     
     reactantNames = [[0 for x in xrange(6)] for x in xrange(6)]
     reactantSplits =[[0 for x in xrange(6)] for x in xrange(6)]
     numreacts = 0
-    
-    ht=Float(0.0, desc='total enthalpy', unit='Btu/lbm')
-    Tt=Float(0.0, desc='total temperature', unit='R')
-    Pt=Float(0.0, desc='total pressure', unit='lbf/in**2')
-    rhot=Float(0.0, desc='total density', unit='lbm/ft**3') 
-    gamt=Float(0.0, desc='total gamma', unit='') 
-    s =Float(0.0, desc='entropy', unit='Btu/lbm-R')
-    W =Float(0.0, desc='weight flow', unit='lbm/s') 
-    FAR =Float(0.0, desc='fuel to air ratio', unit='') 
-    WAR =Float(0.0, desc='water to air ratio', unit='') 
-    hs=Float(0.0, desc='static enthalpy', unit='Btu/lbm')
-    Ts=Float(0.0, desc='static temperature', unit='R')
-    Ps=Float(0.0, desc='static pressure', unit='lbf/in**2')
-    rhos=Float(0.0, desc='static density', unit='lbm/ft**3')
-    gams=Float(0.0, desc='static gamma', unit='')    
-    Vflow =Float(0.0, desc='Velocity', unit='ft/s')   
-    Mach=Float(0.0, desc='Mach number', unit='')
-    area =Float(0.0, desc='flow area', unit='in**2') 
+
+    ht=Float(0.0, desc='total enthalpy', units='Btu/lbm')
+    Tt=Float(0.0, desc='total temperature', units='degR')
+    Pt=Float(0.0, desc='total pressure', units='lbf/inch**2')
+    rhot=Float(0.0, desc='total density', units='lbm/ft**3') 
+    gamt=Float(0.0, desc='total gamma') 
+    Cp = Float(0.0, desc='Specific heat at constant pressure', units='Btu/(lbm*degR)')
+    Cv = Float(0.0, desc='Specific heat at constant volume', units='Btu/(lbm*degR)')
+    s =Float(0.0, desc='entropy', units='Btu/(lbm*R)')
+    W =Float(0.0, desc='weight flow', units='lbm/s') 
+    FAR =Float(0.0, desc='fuel to air ratio') 
+    WAR =Float(0.0, desc='water to air ratio') 
+    hs=Float(0.0, desc='static enthalpy', units='Btu/lbm')
+    Ts=Float(0.0, desc='static temperature', units='degR')
+    Ps=Float(0.0, desc='static pressure', units='lbf/inch**2')
+    rhos=Float(0.0, desc='static density', units='lbm/ft**3')
+    gams=Float(0.0, desc='static gamma')    
+    Vflow =Float(0.0, desc='Velocity', units='ft/s')   
+    Vsonic=Float(0.0, desc='Speed of sound', units='ft/s')
+    Mach=Float(0.0, desc='Mach number')
+    area =Float(0.0, desc='flow area', units='inch**2') 
+    #mu = Float(0.0, desc='dynamic viscosity', units='lbm/(s*ft)')
+
     sub_or_super = Enum(('sub','super'), desc="selects preference for subsonic or supersonice solution when setting area")
-    
-    Wc = Float(0.0, desc='corrected weight flow', unit='lbm/s') 
+
+    Wc = Float(0.0, desc='corrected weight flow', units='lbm/s') 
 
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
-        super(CanteraFlowStation, self).__init__(*args,**kwargs)
+        super(AirFlowStation, self).__init__(*args,**kwargs)
 
         #properties file path
         _dir = dirname(pycycle.__file__)
@@ -92,20 +99,20 @@ class CanteraFlowStation(VariableTree):
         
     def add_reactant(self, reactants, splits ):
     
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][0] = reactants[0]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][1] = reactants[1]           
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][2] = reactants[2]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][3] = reactants[3]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][4] = reactants[4]
-            CanteraFlowStation.reactantNames[CanteraFlowStation.numreacts][5] = reactants[5]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][0] = reactants[0]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][1] = reactants[1]           
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][2] = reactants[2]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][3] = reactants[3]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][4] = reactants[4]
+            AirFlowStation.reactantNames[AirFlowStation.numreacts][5] = reactants[5]
  
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][0] = splits[0]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][1] = splits[1]    
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][2] = splits[2]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][3] = splits[3]   
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][4] = splits[4]
-            CanteraFlowStation.reactantSplits[CanteraFlowStation.numreacts][5] = splits[5]   
-            CanteraFlowStation.numreacts = CanteraFlowStation.numreacts + 1
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][0] = splits[0]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][1] = splits[1]    
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][2] = splits[2]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][3] = splits[3]   
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][4] = splits[4]
+            AirFlowStation.reactantSplits[AirFlowStation.numreacts][5] = splits[5]   
+            AirFlowStation.numreacts = AirFlowStation.numreacts + 1
 
     def _W_changed(self): 
         if self._trigger == 0:
@@ -137,7 +144,7 @@ class CanteraFlowStation(VariableTree):
             self.setStatic()
             self._trigger=0 
 
-    def setComp(self):
+    def _setComp(self):
  
  
         global reactantNames 
@@ -148,11 +155,11 @@ class CanteraFlowStation(VariableTree):
         compname    = ['', '', '', '', '', '', '', '', '', '', '', '']
         fract = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         numcurrent = 0;
-        for cName in range ( 0, CanteraFlowStation.numreacts ):
+        for cName in range ( 0, AirFlowStation.numreacts ):
             for cSpecies in range( 0, 6 ):
-                if CanteraFlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
-                   fract[numcurrent]=CanteraFlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
-                   compname[numcurrent] = CanteraFlowStation.reactantNames[cName][cSpecies];
+                if AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
+                   fract[numcurrent]=AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
+                   compname[numcurrent] = AirFlowStation.reactantNames[cName][cSpecies];
                    numcurrent = numcurrent+1;
     
   
@@ -181,7 +188,7 @@ class CanteraFlowStation(VariableTree):
         self._species[0]=1 
         self.WAR=0
         self.FAR=0
-        self.setComp()
+        self._setComp()
         self._trigger=0
    
     #set the compositon to air with water
@@ -191,59 +198,56 @@ class CanteraFlowStation(VariableTree):
         self.FAR=0
         self._species[0]=(1-WAR)/(1+WAR)
         self._species[1]=(WAR)/(1+WAR)
-        self.setComp()
+        self._setComp()
         self.setStatic()
         self._trigger=0
 
-        #set total conditions based on T an P
+    def _total_calcs(self): 
+        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
+        self.s=self._flow.entropy_mass()*0.000238845896627
+        self.rhot=self._flow.density()*.0624
+        self.Tt=self._flow.temperature()*9./5.
+        self.Cp = self._flow.cp_mass()*2.388459e-4
+        self.Cv = self._flow.cv_mass()*2.388459e-4
+        self.gamt=self.Cp/self.Cv
+        self._flowS=self._flow 
+        self.setStatic()
+        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)    
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+
+        #self.mu = self._flow.viscosity()*0.671968975    
+        self._trigger=0
+
+    #set total conditions based on T an P
     def setTotalTP(self, Tin, Pin):
-        self.setComp()    
+        self._setComp()    
         self._trigger=1
         self.Tt=Tin
         self.Pt=Pin                
         self._flow.set(T=Tin*5./9., P=Pin*6894.75729)
         self._flow.equilibrate('TP')
-        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
-        self.s=self._flow.entropy_mass()*0.000238845896627
-        self.rhot=self._flow.density()*.0624
-        self.Tt=self._flow.temperature()*9./5.
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self._flowS=self._flow 
-        self.setStatic()
-        self._calculated_properties()
-        self._trigger=0
+        self._total_calcs()
 
     #set total conditions based on h and P
     def setTotal_hP(self, hin, Pin):
-        self.setComp()
+        self._setComp()
         self._trigger=1 
         self.ht=hin
         self.Pt=Pin
         self._flow.set(H=hin/.0004302099943161011, P=Pin*6894.75729)
         self._flow.equilibrate('HP')
-        self.Tt=self._flow.temperature()*9./5.
-        self.s=self._flow.entropy_mass()*0.000238845896627    
-        self.rhot=self._flow.density()*.0624
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self.setStatic()
-        self._calculated_properties()
-        self._trigger=0
- 
+        self._total_calcs()
+
 
     #set total condition based on S and P
     def setTotalSP(self, sin, Pin):
-        self.setComp()
+        self._setComp()
         self._trigger=1
         self.s=sin
         self.Pt=Pin             
         self._flow.set(S=sin/0.000238845896627, P=Pin*6894.75729)
         self._flow.equilibrate('SP', loglevel=1)
-        self.Tt=self._flow.temperature()*9./5.
-        self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
-        self.rhot=self._flow.density()*.0624
-        self.gamt=self._flow.cp_mass()/self._flow.cv_mass()
-        self.setStatic()
-        self._calculated_properties()
+        self._total_calcs()
         self._trigger=0
 
     #add another station to this one
@@ -252,7 +256,7 @@ class CanteraFlowStation(VariableTree):
         temp =""
         for i in range(0, len(self._species)):
                 self._species[i]=(self.W*self._species[i]+FS2.W*FS2._species[i])/(self.W + FS2.W)
-        self.setComp()
+        self._setComp()
         air1 = self.W * ( 1. / ( 1. + self.FAR + self.WAR ))
         air2 = FS2.W *( 1. / ( 1 + FS2.WAR + FS2.FAR ))
         self.FAR = ( air1 * self.FAR + air2*FS2.FAR )/( air1 + air2 )
@@ -299,7 +303,7 @@ class CanteraFlowStation(VariableTree):
         self.ht= (flow_1 * self.ht + Wfuel * hfuel)/ self.W
         air1=flow_1 * (1. / (1. + self.FAR + self.WAR))
         self.FAR=(air1 * self.FAR + Wfuel)/(air1)
-        self.setComp() 
+        self._setComp() 
         self._flow.set(T=2660*5/9, P=self.Pt*6894.75729)
         self._flow.equilibrate('TP')
         self._flow.set(H=self.ht/0.0004302099943161011, P=self.Pt*6894.75729)
@@ -317,7 +321,7 @@ class CanteraFlowStation(VariableTree):
             self.setStaticPs()
             return self.Mach - mach_target
 
-        Ps_guess = self.Pt*(1 + (self.gamt-1)/2*mach_target**2)**(self.gamt/(1-self.gamt))
+        Ps_guess = self.Pt*(1 + (self.gamt-1)/2*mach_target**2)**(self.gamt/(1-self.gamt))*.9
         secant(f, Ps_guess, x_min=0, x_max=self.Pt)
 
 
@@ -330,9 +334,8 @@ class CanteraFlowStation(VariableTree):
         self.rhos=self._flowS.density()*.0624
         self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
         self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
-        Vson=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
-        self.Mach=self.Vflow / Vson
+        self.Mach=self.Vflow / self.Vsonic
         self.area= self.W / (self.rhos*self.Vflow)*144. 
 
     def setStaticArea(self): 
@@ -350,7 +353,6 @@ class CanteraFlowStation(VariableTree):
         def f(Ps):
             self.Ps = Ps
             self.setStaticPs()
-            #print "TEST", self.Ps, self.Pt
             return self.W/(self.rhos*self.Vflow)*144.-target_area
         secant(f,  guess, x_min=0, x_max=self.Pt)
 
@@ -384,17 +386,20 @@ class CanteraFlowStation(VariableTree):
         elif self._mach_or_area == 3:
             self.setStaticPs()
 
-    def _calculated_properties(self): 
-        self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)
-
-
     #set the statics based on Ts, Ps, and MN
     #UPDGRAEDE TO USE LOOPS
     def setStaticTsPsMN(self, Ts, Ps, MN): 
         self._trigger=1 
+
         self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
         self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
         self.setTotalTP(self.Tt, self.Pt)
+
+        #do this once more beacause gamt changed... very crude iteration
+        self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
+        self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
+        self.setTotalTP(self.Tt, self.Pt)
+
         self._trigger=1
         self.Mach=MN 
         self.setStaticMach()
@@ -404,4 +409,4 @@ class CanteraFlowStation(VariableTree):
 #variable class used in components
 class FlowStation(VarTree): 
     def __init__(self,*args,**metadata): 
-        super(FlowStation,self).__init__(CanteraFlowStation(), *args, **metadata)
+        super(FlowStation,self).__init__(AirFlowStation(), *args, **metadata)

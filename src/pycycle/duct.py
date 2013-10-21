@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStation, AirFlowStation
 from pycycle.cycle_component import CycleComponent
 
 

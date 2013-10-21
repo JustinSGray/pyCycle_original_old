@@ -3,7 +3,7 @@ import math
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree, Event
 
-from pycycle.flowstation import CanteraFlowStation, FlowStation, GAS_CONSTANT
+from pycycle.flowstation import AirFlowStation, FlowStation, GAS_CONSTANT
 from pycycle.cycle_component import CycleComponent
 
 
@@ -42,7 +42,7 @@ class Compressor(CycleComponent):
 
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O
-        fs_ideal = CanteraFlowStation()
+        fs_ideal = AirFlowStation()
         Fl_O.W = Fl_I.W
         
         
@@ -72,7 +72,6 @@ class Compressor(CycleComponent):
         delta_s = Fl_O.s - Fl_I.s
         self.eff_poly = C/(C+delta_s)
         self.pwr = Fl_I.W*(Fl_O.ht - Fl_I.ht) * 1.4148532 #btu/s to hp 
-
         self.tip_radius = (Fl_O.area/math.pi/(1-self.hub_to_tip**2))**.5
         self.hub_radius = self.hub_to_tip*self.tip_radius
 
