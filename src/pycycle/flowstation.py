@@ -1,4 +1,4 @@
-__all__ = ['AirFlowStation']
+__all__ = ['FlowStation']
 
 from os.path import dirname, join
 
@@ -12,7 +12,7 @@ import pycycle #used to find file paths
 GAS_CONSTANT = 0.0685592 #BTU/lbm-R
 
 #secant solver with a limit on overall step size
-def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
+def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15 ):
     if x0 >= 0:
         x1 = x0*(1 + 1e-4) + 1e-4
     else:
@@ -28,7 +28,7 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
             break 
         dx = f * (x0 - x1) / float(f - f1)      
         if abs(dx) < TOL * (1 + abs(x0)): 
-            return x0 - dx
+            return x0 - dx	
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
             x1, x0 = x0, (x_min+x0)/2
@@ -42,7 +42,7 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
     return x0
 
 
-class AirFlowStation(VariableTree):
+class FlowStation(VariableTree):
 
     reactants = []
     
@@ -79,7 +79,7 @@ class AirFlowStation(VariableTree):
 
     #intialize station        
     def __init__(self,*args,**kwargs): 
-        super(AirFlowStation, self).__init__(*args,**kwargs)
+        super(FlowStation, self).__init__(*args,**kwargs)
 
         #properties file path
         _dir = dirname(pycycle.__file__)
@@ -99,20 +99,20 @@ class AirFlowStation(VariableTree):
         
     def add_reactant(self, reactants, splits ):
     
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][0] = reactants[0]
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][1] = reactants[1]           
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][2] = reactants[2]
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][3] = reactants[3]
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][4] = reactants[4]
-            AirFlowStation.reactantNames[AirFlowStation.numreacts][5] = reactants[5]
+            FlowStation.reactantNames[FlowStation.numreacts][0] = reactants[0]
+            FlowStation.reactantNames[FlowStation.numreacts][1] = reactants[1]           
+            FlowStation.reactantNames[FlowStation.numreacts][2] = reactants[2]
+            FlowStation.reactantNames[FlowStation.numreacts][3] = reactants[3]
+            FlowStation.reactantNames[FlowStation.numreacts][4] = reactants[4]
+            FlowStation.reactantNames[FlowStation.numreacts][5] = reactants[5]
  
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][0] = splits[0]
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][1] = splits[1]    
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][2] = splits[2]
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][3] = splits[3]   
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][4] = splits[4]
-            AirFlowStation.reactantSplits[AirFlowStation.numreacts][5] = splits[5]   
-            AirFlowStation.numreacts = AirFlowStation.numreacts + 1
+            FlowStation.reactantSplits[FlowStation.numreacts][0] = splits[0]
+            FlowStation.reactantSplits[FlowStation.numreacts][1] = splits[1]    
+            FlowStation.reactantSplits[FlowStation.numreacts][2] = splits[2]
+            FlowStation.reactantSplits[FlowStation.numreacts][3] = splits[3]   
+            FlowStation.reactantSplits[FlowStation.numreacts][4] = splits[4]
+            FlowStation.reactantSplits[FlowStation.numreacts][5] = splits[5]   
+            FlowStation.numreacts = FlowStation.numreacts + 1
 
     def _W_changed(self): 
         if self._trigger == 0:
@@ -155,11 +155,11 @@ class AirFlowStation(VariableTree):
         compname    = ['', '', '', '', '', '', '', '', '', '', '', '']
         fract = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         numcurrent = 0;
-        for cName in range ( 0, AirFlowStation.numreacts ):
+        for cName in range ( 0, FlowStation.numreacts ):
             for cSpecies in range( 0, 6 ):
-                if AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
-                   fract[numcurrent]=AirFlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
-                   compname[numcurrent] = AirFlowStation.reactantNames[cName][cSpecies];
+                if FlowStation.reactantSplits[cName][cSpecies]*self._species[cName] > 0.00001:
+                   fract[numcurrent]=FlowStation.reactantSplits[cName][cSpecies]*self._species[cName];        
+                   compname[numcurrent] = FlowStation.reactantNames[cName][cSpecies];
                    numcurrent = numcurrent+1;
     
   
@@ -182,7 +182,7 @@ class AirFlowStation(VariableTree):
             
         self._flow.setMassFractions( tempcomp )
 
-  
+
     #set the composition to dry air
     def setDryAir(self):
         self._species[0]=1 
@@ -190,18 +190,23 @@ class AirFlowStation(VariableTree):
         self.FAR=0
         self._setComp()
         self._trigger=0
-   
+        
+    #set the composition to pure mixture of one of the reactants    
+    def setReactant(self, i):
+    	self._species= [0,0,0,0,0,0]
+        self._species[i-1] = 1
+        
     #set the compositon to air with water
     def setWAR(self, WAR):
         self._trigger=1
         self.WAR=WAR
         self.FAR=0
-        self._species[0]=(1-WAR)/(1+WAR)
+        self._species[0]=(1)/(1+WAR)
         self._species[1]=(WAR)/(1+WAR)
         self._setComp()
         self.setStatic()
         self._trigger=0
-
+        
     def _total_calcs(self): 
         self.ht=self._flow.enthalpy_mass()*0.0004302099943161011
         self.s=self._flow.entropy_mass()*0.000238845896627
@@ -261,7 +266,7 @@ class AirFlowStation(VariableTree):
         air2 = FS2.W *( 1. / ( 1 + FS2.WAR + FS2.FAR ))
         self.FAR = ( air1 * self.FAR + air2*FS2.FAR )/( air1 + air2 )
         self.WAR = ( air1 * self.WAR + air2*FS2.WAR )/( air1 + air2 )
-        self.ht=(self.W*self.ht+FS2.W+FS2.ht)/(self.W+FS2.W)
+        self.ht=(self.W*self.ht+FS2.W*FS2.ht)/(self.W+FS2.W)
         self.W=self.W +(FS2.W)
         self._flow.set(T=self.Tt*5./9., P=self.Pt*6894.75729) 
         self._flow.equilibrate('TP')
@@ -333,8 +338,9 @@ class AirFlowStation(VariableTree):
         self.Ts=self._flowS.temperature()*9./5.
         self.rhos=self._flowS.density()*.0624
         self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
-        self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011                   
+        self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011 
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
         self.Mach=self.Vflow / self.Vsonic
         self.area= self.W / (self.rhos*self.Vflow)*144. 
 
@@ -354,7 +360,7 @@ class AirFlowStation(VariableTree):
             self.Ps = Ps
             self.setStaticPs()
             return self.W/(self.rhos*self.Vflow)*144.-target_area
-        secant(f,  guess, x_min=0, x_max=self.Pt)
+        secant(f,  guess, x_min=Ps_M1, x_max=self.Pt)
 
         #if you want the supersonic one, just keep going with a little lower initial guess    
         if self.sub_or_super == "super":
@@ -407,6 +413,6 @@ class AirFlowStation(VariableTree):
         self._trigger=0
 
 #variable class used in components
-class FlowStation(VarTree): 
-    def __init__(self,*args,**metadata): 
-        super(FlowStation,self).__init__(AirFlowStation(), *args, **metadata)
+#class FlowStation(VarTree): 
+   #def __init__(self,*args,**metadata): 
+        #super(FlowStation,self).__init__(FlowStation(), *args, **metadata)
