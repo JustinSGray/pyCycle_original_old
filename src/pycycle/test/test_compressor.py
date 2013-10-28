@@ -4,14 +4,14 @@ import unittest
 from openmdao.main.api import set_as_top
 from openmdao.util.testutil import assert_rel_error
 
-from pycycle import compressor, flowstation
+from pycycle.api import Compressor, FlowStation
 
 class CompressorTestCase(unittest.TestCase):
 
     def setUp(self): 
-        self.comp = set_as_top(compressor.Compressor())
+        self.comp = set_as_top(Compressor())
 
-        self.fs = flowstation.FlowStation()
+        self.fs = FlowStation()
         self.fs.W = 1.08
         self.fs.setTotalTP(630.74523, 0.0271945)
         self.fs.Mach = .6

@@ -5,14 +5,6 @@ from openmdao.util.testutil import assert_rel_error
 
 from pycycle.flowstation import FlowStation
 
-fs = FlowStation()
-fs.add_reactant( ['N2', 'O2', 'AR', 'CO2', '', ''],[.755184, .231416, .012916, 0.000485, 0., 0. ] )
-fs.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
-fs.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
-fs.add_reactant( ['C', 'H', '', '', '', ''], [.86144,.13856, 0., 0., 0., 0. ] )   
-fs.add_reactant( ['Jet-A(g)', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )   
-fs.add_reactant( ['H2', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )  
-
 
 class FlowStationTestCase(unittest.TestCase):
 

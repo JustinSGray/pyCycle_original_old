@@ -95,8 +95,8 @@ class FlowStation(VariableTree):
         self._flowS=importPhase(_prop_file)
 
     #add a reactant that can be mixed in
-        
-    def add_reactant(self, reactants, splits ):
+    @staticmethod
+    def add_reactant(reactants, splits ):
     
             FlowStation.reactantNames[FlowStation.numreacts][0] = reactants[0]
             FlowStation.reactantNames[FlowStation.numreacts][1] = reactants[1]           
@@ -411,7 +411,16 @@ class FlowStation(VariableTree):
         self.area= self.W / (self.rhos * self.Vflow)*144. 
         self._trigger=0
 
+
+#For right now, all FlowStations are Air/Fuel FlowStations
+FlowStation.add_reactant( ['N2', 'O2', 'AR', 'CO2', '', ''],[.755184, .231416, .012916, 0.000485, 0., 0. ] )
+FlowStation.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
+FlowStation.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
+FlowStation.add_reactant( ['C', 'H', '', '', '', ''], [.86144,.13856, 0., 0., 0., 0. ] )   
+FlowStation.add_reactant( ['Jet-A(g)', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )   
+FlowStation.add_reactant( ['H2', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )  
+
 #variable class used in components
-#class FlowStationVar(VarTree): 
-   #def __init__(self,*args,**metadata): 
-        #super(FlowStation,self).__init__(FlowStation(), *args, **metadata)
+class FlowStationVar(VarTree): 
+   def __init__(self,*args,**metadata): 
+        super(FlowStationVar,self).__init__(FlowStation(), *args, **metadata)

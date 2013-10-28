@@ -34,7 +34,7 @@ class SplitterTestCase(unittest.TestCase):
     def check(self, comp): 
 
 
-        TOL = .002
+        TOL = .001
         assert_rel_error(self,comp.Fl_O1.W, 1.08 ,TOL)
         assert_rel_error(self,comp.Fl_O1.Pt, 0.0271945 , TOL)
         assert_rel_error(self,comp.Fl_O1.Tt, 630.75, TOL)
@@ -52,7 +52,7 @@ class SplitterTestCase(unittest.TestCase):
     def test_splitterBPR(self): 
         comp = self.comp
 
-        comp.BPR_des = 2.2285
+        comp.BPR = 2.2285
         comp.MNexit1_des = 1.00
         comp.MNexit2_des = 1.00
         comp.design = True

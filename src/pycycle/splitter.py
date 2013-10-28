@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pycycle.flowstation import FlowStation
+from pycycle.flowstation import FlowStation, FlowStationVar
 from pycycle.cycle_component import CycleComponent
 
 
@@ -17,26 +17,22 @@ class SplitterBPR(CycleComponent):
 
 
     BPR_des = Float(iotype="out", desc="bypass ratio of the splitter at the design condition")
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to splitter", copy=None)
-    Fl_O1 = FlowStation(iotype="out", desc="outgoing air stream 1", copy=None)
-    Fl_O2 = FlowStation(iotype="out", desc="outgoing air stream 2", copy=None)
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to splitter", copy=None)
+    Fl_O1 = FlowStationVar(iotype="out", desc="outgoing air stream 1", copy=None)
+    Fl_O2 = FlowStationVar(iotype="out", desc="outgoing air stream 2", copy=None)
 
 
     def execute(self): 
         Fl_I = self.Fl_I
         Fl_O1 = self.Fl_O1
         Fl_O2 = self.Fl_O2
-<<<<<<< HEAD
 
         Fl_O1.W = Fl_I.W/(self.BPR+1)
         Fl_O2.W = Fl_O1.W*self.BPR
 
-=======
->>>>>>> a0a8cf7dfa8a8d127b3d2626ffee06a45c7fd2fa
         Fl_O1.setTotalTP(Fl_I.Tt, Fl_I.Pt)
         Fl_O2.setTotalTP(Fl_I.Tt, Fl_I.Pt)
         
-
 
         if self.run_design: 
             Fl_O1.Mach = self.MNexit1_des
@@ -44,6 +40,8 @@ class SplitterBPR(CycleComponent):
 
             self._exit_area_1_des = Fl_O1.area
             self._exit_area_2_des = Fl_O2.area
+
+            self.BPR_des = self.BPR
         else: 
             Fl_O1.area = self._exit_area_1_des
             Fl_O2.area = self._exit_area_2_des
@@ -56,9 +54,9 @@ class SplitterW(CycleComponent):
     MNexit2_des = Float(.4, iotype="in", 
         desc="mach number at the design condition for Fl_O2")
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to splitter", copy=None)
-    Fl_O1 = FlowStation(iotype="out", desc="outgoing air stream 1", copy=None)
-    Fl_O2 = FlowStation(iotype="out", desc="outgoing air stream 2", copy=None)
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to splitter", copy=None)
+    Fl_O1 = FlowStationVar(iotype="out", desc="outgoing air stream 1", copy=None)
+    Fl_O2 = FlowStationVar(iotype="out", desc="outgoing air stream 2", copy=None)
 
     def execute(self): 
         """Takes a single incoming air stream and splits it into two separate ones

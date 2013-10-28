@@ -4,12 +4,14 @@ import unittest
 from openmdao.main.api import set_as_top, Assembly
 from openmdao.util.testutil import assert_rel_error
 
-from pycycle import start
+
+from pycycle.api import FlowStart, FlowStation
+
 
 class TestA(Assembly): 
 
     def configure(self):
-        comp = self.add('comp', start.FlowStart())
+        comp = self.add('comp', FlowStart())
 
         comp.W = 3.488
         comp.Pt = 0.0272
@@ -35,7 +37,7 @@ class StartTestCase(unittest.TestCase):
 
 
     def test_start(self): 
-        comp = set_as_top(start.FlowStart())
+        comp = set_as_top(FlowStart())
 
         comp.W = 3.488
         comp.Pt = 0.0272
