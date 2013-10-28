@@ -15,7 +15,7 @@ class DuctTestCase(unittest.TestCase):
         comp.Q_dot = -237.8
         comp.MNexit_des = .4
 
-        fs = flowstation.CanteraFlowStation()
+        fs = flowstation.FlowStation()
         fs.W = 1.080
         fs.setTotalTP(1424.01, .34)
         fs.Mach = .4

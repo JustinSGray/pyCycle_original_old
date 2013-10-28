@@ -3,7 +3,6 @@ import math
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree, Event
 
-from pycycle.flowstation import CanteraFlowStation, FlowStation, GAS_CONSTANT
 
 class CycleComponent(Component): 
 

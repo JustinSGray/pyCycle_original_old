@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree, Enum
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStationVar, FlowStation
 from pycycle.cycle_component import CycleComponent
 
 
@@ -10,12 +10,12 @@ class Nozzle(CycleComponent):
     """Calculates the gross thrust for a convergent-divergent nozzle, assuming an ideally expanded
     exit condition"""
 
-    Fl_ref = FlowStation(iotype="in", desc="Flowstation with reference exit conditions")
+    Fl_ref = FlowStationVar(iotype="in", desc="Flowstation with reference exit conditions", copy=None)
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to nozzle")
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to nozzle", copy=None)
     dPqP = Float(0, iotype="in", desc="ratio of change in total pressure to incomming total pressure")
     
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from nozzle")
+    Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from nozzle", copy=None)
     Athroat_dmd = Float(iotype="out", desc="demand throat area for the nozzle at the operating condition.")
     Athroat_des = Float(iotype="out", desc="nozzle throat area at the design condition")
     Aexit_des = Float(iotype="out", desc="nozzle exit area at the design condition")
@@ -48,8 +48,8 @@ class Nozzle(CycleComponent):
         Fl_O = self.Fl_O
         Fl_ref = self.Fl_ref
 
-        fs_throat = CanteraFlowStation()
-        fs_exitIdeal = CanteraFlowStation()
+        fs_throat = FlowStation()
+        fs_exitIdeal = FlowStation()
 
         fs_throat.W = Fl_I.W
         Pt_out = (1-self.dPqP)*Fl_I.Pt

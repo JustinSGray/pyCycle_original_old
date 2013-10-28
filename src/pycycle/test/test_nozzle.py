@@ -16,14 +16,14 @@ class NozzleTestCaseResonable(unittest.TestCase):
 
         self.comp = set_as_top(Nozzle())
 
-        fs = flowstation.CanteraFlowStation()
+        fs = flowstation.FlowStation()
         fs.W = 100.
         fs.setTotalTP( 700., 50.0 )
         fs.Mach = 0.40
 
         self.comp.Fl_I = fs
 
-        fs_ref = flowstation.CanteraFlowStation()
+        fs_ref = flowstation.FlowStation()
         fs_ref.W = 1.0
         fs_ref.setTotalTP( 518.67, 15.0 )
         fs_ref.Mach = 0.0
@@ -184,14 +184,14 @@ class NozzleTestCaseVeryLowTemp(unittest.TestCase):
     def test_nozzle_very_low_temperatures(self): 
         comp = set_as_top(Nozzle())
 
-        fs = flowstation.CanteraFlowStation()
+        fs = flowstation.FlowStation()
         fs.W = .639
         fs.setTotalTP(540. , 0.34)
         fs.Mach = 0.4
 
         comp.Fl_I = fs
 
-        fs_ref = flowstation.CanteraFlowStation()
+        fs_ref = flowstation.FlowStation()
         fs_ref.W = 3.488
         fs_ref.setTotalTP(630.75 , 0.0272)
         fs_ref.Mach = 1.0

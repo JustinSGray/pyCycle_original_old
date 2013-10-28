@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStationVar, FlowStation
 from pycycle.cycle_component import CycleComponent
 
 
@@ -13,8 +13,9 @@ class Inlet(CycleComponent):
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
 
     A_capture = Float(iotype="in", desc="area at the entrance plane to the inlet", units="inch**2")
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor", copy=None)
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor", copy=None)
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to compressor", copy=None)
+    Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
+    F_ram = Float(iotype="out", desc="ram drag from the inlet", units="lbf")
 
 
     def execute(self): 
@@ -25,13 +26,14 @@ class Inlet(CycleComponent):
         Fl_O.setTotalTP(Fl_I.Tt, Pt_out)
         Fl_O.W = Fl_I.W
 
+        self.F_ram = Fl_I.W*Fl_I.Vflow/32.174 #lbf
+
         if self.run_design: 
             Fl_O.Mach = self.MNexit_des
             self._exit_area_des = Fl_O.area
             self.A_capture = Fl_I.area
         else: 
             Fl_O.area = self._exit_area_des
-
 
 
 

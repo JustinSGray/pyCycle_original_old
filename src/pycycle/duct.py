@@ -1,7 +1,7 @@
 from openmdao.main.api import Component
 from openmdao.lib.datatypes.api import Float, VarTree
 
-from pycycle.flowstation import FlowStation, CanteraFlowStation
+from pycycle.flowstation import FlowStation, FlowStationVar
 from pycycle.cycle_component import CycleComponent
 
 
@@ -13,8 +13,8 @@ class Duct(CycleComponent):
     Q_dot = Float(0.0, iotype="in", units="Btu/s", desc="heat flow rate into (positive) or out of (negative) the air")
     MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to compressor", copy=None)
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from compressor", copy=None)
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to compressor", copy=None)
+    Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
 
 
     def execute(self): 
