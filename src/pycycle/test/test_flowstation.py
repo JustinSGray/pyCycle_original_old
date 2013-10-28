@@ -2,6 +2,7 @@
 import unittest
 
 from pycycle.flowstation import CanteraFlowStation
+from openmdao.util.testutil import assert_rel_error
 
 class FlowStationTestCase(unittest.TestCase):
 
@@ -34,6 +35,23 @@ class FlowStationTestCase(unittest.TestCase):
         self.assertAlmostEqual(self.fs.ht, -6.32816, places=4) #Tom says the ht values will be different
         self.assertAlmostEqual(self.fs.W, 100, places=2)
         self.assertAlmostEqual(self.fs.rhot, .07812, places=4)
+
+    def test_setTotalTP_low_pressure(self): 
+        #self.fs.W = 0.745537973147
+        #self.fs.area = 133.817708407
+        #self.fs.Mach =  0.985900154274
+        #self.fs.setTotalTP(1019.04099929, 0.332230438247)
+        #print self.fs.Ps, self.fs.rhos, self.fs.area
+
+        self.fs.W = 0.745740162779 
+        self.fs.setTotalTP(1032.48576476, 0.33718196038)
+        self.fs.Mach = 1
+        #self.fs.area = 133.817708407
+
+        print self.fs.area, self.fs.Ps
+
+        self.fail()
+
  
     def test_setTotal_hP(self):
         ht = self.fs.ht
@@ -125,13 +143,14 @@ class TestStatics(unittest.TestCase):
     #all test cases use the same checks here, so just re-use
     def _assert(self): 
  
-        self.assertAlmostEqual(self.fs.area, 32.0066, places=1)  
-        self.assertAlmostEqual(self.fs.Mach, .3, places=1)   
-        self.assertAlmostEqual(self.fs.Ps, 376.219, places=1)
-        self.assertAlmostEqual(self.fs.Ts, 1081.732, places=0)   
-        self.assertAlmostEqual(self.fs.Vflow, 479.298, places=0)
-        self.assertAlmostEqual(self.fs.rhos, .9347, places=2)       
-        self.assertAlmostEqual(self.fs.Mach, .3, places=2)   
+        TOL = .001
+        assert_rel_error(self,self.fs.area, 32.0066, TOL)  
+        assert_rel_error(self,self.fs.Mach, .3, TOL)   
+        assert_rel_error(self,self.fs.Ps, 376.219, TOL)
+        assert_rel_error(self,self.fs.Ts, 1081.732, TOL)   
+        assert_rel_error(self,self.fs.Vflow, 479.298, TOL)
+        assert_rel_error(self,self.fs.rhos, 0.93825, TOL)       
+        assert_rel_error(self,self.fs.Mach, .3, TOL)   
         
     def test_set_Mach(self):
         self.fs.Mach = .3

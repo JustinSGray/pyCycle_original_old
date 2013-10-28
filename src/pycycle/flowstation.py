@@ -21,11 +21,14 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
     if (abs(f) > abs(f1)):
         x1, x0 = x0, x1 
         f1, f = f, f1
-    count = 0
+    dx = f * (x0 - x1) / float(f - f1)  
+    count = 0  
     while 1:
-        dx = f * (x0 - x1) / float(f - f1)      
         if abs(dx) < TOL * (1 + abs(x0)): 
-            return x0 - dx
+        #if abs((f1-f)/(f+1e-10)) < TOL: 
+            return x0 -dx
+        dx = f * (x0 - x1) / float(f - f1)  
+        df = abs((f1-f)/(f+1e-10))      
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
             x1, x0 = x0, (x_max+x0)/2
@@ -35,8 +38,6 @@ def secant(func, x0, TOL=1e-5, x_min=1e15, x_max=1e15 ):
             x1, x0 = x0, x0 - dx
         f1, f = f, func(x0) 
         count = count + 1
-
-    return x0
 
 
 class CanteraFlowStation(VariableTree):

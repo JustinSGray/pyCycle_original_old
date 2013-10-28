@@ -6,7 +6,7 @@ from openmdao.util.testutil import assert_rel_error
 
 from pycycle import splitter, flowstation
 
-class CompressorTestCase(unittest.TestCase):
+class SplitterTestCase(unittest.TestCase):
 
     def setUp(self): 
         self.comp = set_as_top(splitter.Splitter())
@@ -22,7 +22,7 @@ class CompressorTestCase(unittest.TestCase):
     def test_splitter(self): 
         comp = self.comp
 
-        comp.BPR_des = 2.2285
+        comp.BPR = 2.2285
         comp.MNexit1_des = 1.00
         comp.MNexit2_des = 1.00
         comp.design = True

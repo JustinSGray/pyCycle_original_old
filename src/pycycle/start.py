@@ -13,13 +13,18 @@ class FlowStart(CycleComponent):
     Tt = Float(518, iotype="in", desc="total temperature", units="R")
     Mach = Float(.1, iotype="in", desc="Mach Number")
 
+    area_des = Float(iotype="out", desc="flow area at the design condition")
     Fl_O = FlowStation(iotype="out", desc="outgoing flow at the specified conditions", copy=None)
 
 
     def execute(self): 
-        self.Fl_O.setTotalTP(self.Tt, self.Pt)
-        self.Fl_O.W = self.W
-        self.Fl_O.Mach = self.Mach
+        Fl_O = self.Fl_O
+        Fl_O.setTotalTP(self.Tt, self.Pt)
+        Fl_O.W = self.W
+        Fl_O.Mach = self.Mach
+
+        if self.run_design: 
+            self.area_des = Fl_O.area
 
 
 
