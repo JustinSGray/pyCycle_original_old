@@ -20,7 +20,7 @@ from openmdao.lib.datatypes.api import Float, Bool
 from openmdao.lib.drivers.api import BroydenSolver 
 from openmdao.main.api import convert_units as cu
 
-from pycycle.flowstation import FlowStation, AirFlowStation
+from pycycle.flowstation import FlowStationVar, FlowStation
 from pycycle.cycle_component import CycleComponent
 
 
@@ -41,7 +41,7 @@ class HeatExchanger(CycleComponent):
     T_cold_out = Float(518, iotype="in", units = 'R', desc='Temp of water out of the heat exchanger') 
     
 
-    Fl_I = FlowStation(iotype="in", desc="incoming air stream to heat exchanger", copy=None)
+    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to heat exchanger", copy=None)
 
     #outputs
     Qreleased = Float(iotype="out", units = 'hp', desc='Energy Released') 
@@ -52,7 +52,7 @@ class HeatExchanger(CycleComponent):
     residual_qmax = Float(iotype="out", desc='Residual of max*effectiveness') 
     residual_e_balance = Float(iotype="out", desc='Residual of the energy balance')
 
-    Fl_O = FlowStation(iotype="out", desc="outgoing air stream from heat exchanger", copy=None)
+    Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from heat exchanger", copy=None)
 
     def execute(self):
         """Calculate Various Paramters"""
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             #hx.Wh = 0.49
             #hx.Cp_hot = 1.006
             #hx.T_hot_in = 791
-            fs = AirFlowStation()
+            fs = FlowStation()
             fs.setTotalTP(1423.8, 0.302712118187) #R, psi
             fs.W = 1.0
             hx.Fl_I = fs

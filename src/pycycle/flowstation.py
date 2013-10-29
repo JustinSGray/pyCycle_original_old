@@ -21,14 +21,15 @@ def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15 ):
     if (abs(f) > abs(f1)):
         x1, x0 = x0, x1 
         f1, f = f, f1
-    count = 0
-
+    dx = f * (x0 - x1) / float(f - f1)  
+    count = 0  
     while 1:
-        if abs(f-f1) < TOL: 
-            break 
-        dx = f * (x0 - x1) / float(f - f1)      
         if abs(dx) < TOL * (1 + abs(x0)): 
-            return x0 - dx	
+        #if abs((f1-f)/(f+1e-10)) < TOL: 
+            return x0 -dx
+        dx = f * (x0 - x1) / float(f - f1)  
+        df = abs((f1-f)/(f+1e-10))      
+
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
             x1, x0 = x0, (x_min+x0)/2
@@ -38,8 +39,6 @@ def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15 ):
             x1, x0 = x0, x0 - dx
         f1, f = f, func(x0) 
         count = count + 1
-
-    return x0
 
 
 class FlowStation(VariableTree):
@@ -96,8 +95,8 @@ class FlowStation(VariableTree):
         self._flowS=importPhase(_prop_file)
 
     #add a reactant that can be mixed in
-        
-    def add_reactant(self, reactants, splits ):
+    @staticmethod
+    def add_reactant(reactants, splits ):
     
             FlowStation.reactantNames[FlowStation.numreacts][0] = reactants[0]
             FlowStation.reactantNames[FlowStation.numreacts][1] = reactants[1]           
@@ -412,7 +411,16 @@ class FlowStation(VariableTree):
         self.area= self.W / (self.rhos * self.Vflow)*144. 
         self._trigger=0
 
+
+#For right now, all FlowStations are Air/Fuel FlowStations
+FlowStation.add_reactant( ['N2', 'O2', 'AR', 'CO2', '', ''],[.755184, .231416, .012916, 0.000485, 0., 0. ] )
+FlowStation.add_reactant( ['H2O', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )    
+FlowStation.add_reactant( ['CH2', 'CH', '', '', '', ''], [.922189, 0.07781, 0., 0., 0., 0. ] )           
+FlowStation.add_reactant( ['C', 'H', '', '', '', ''], [.86144,.13856, 0., 0., 0., 0. ] )   
+FlowStation.add_reactant( ['Jet-A(g)', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )   
+FlowStation.add_reactant( ['H2', '', '', '', '', ''], [1., 0., 0., 0., 0., 0. ] )  
+
 #variable class used in components
-#class FlowStation(VarTree): 
-   #def __init__(self,*args,**metadata): 
-        #super(FlowStation,self).__init__(FlowStation(), *args, **metadata)
+class FlowStationVar(VarTree): 
+   def __init__(self,*args,**metadata): 
+        super(FlowStationVar,self).__init__(FlowStation(), *args, **metadata)

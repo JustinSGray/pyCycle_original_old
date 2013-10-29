@@ -6,12 +6,12 @@ from openmdao.util.testutil import assert_rel_error
 
 from pycycle import splitter, flowstation
 
-class CompressorTestCase(unittest.TestCase):
+class SplitterTestCase(unittest.TestCase):
 
     def setUp(self): 
         self.comp = set_as_top(splitter.SplitterBPR())
 
-        self.fs = flowstation.AirFlowStation()
+        self.fs = flowstation.FlowStation()
         self.fs.W = 3.48771299
         self.fs.setTotalTP(630.74523, 0.0271945)
         self.fs.Mach = 1
@@ -19,9 +19,22 @@ class CompressorTestCase(unittest.TestCase):
     def tearDown(self): 
         comp = None
 
+    def test_splitter(self): 
+        comp = self.comp
+
+        comp.BPR = 2.2285
+        comp.MNexit1_des = 1.00
+        comp.MNexit2_des = 1.00
+        comp.design = True
+
+        comp.Fl_I = self.fs
+
+        comp.run()
+
     def check(self, comp): 
 
-        TOL = .002
+
+        TOL = .001
         assert_rel_error(self,comp.Fl_O1.W, 1.08 ,TOL)
         assert_rel_error(self,comp.Fl_O1.Pt, 0.0271945 , TOL)
         assert_rel_error(self,comp.Fl_O1.Tt, 630.75, TOL)
@@ -39,7 +52,7 @@ class CompressorTestCase(unittest.TestCase):
     def test_splitterBPR(self): 
         comp = self.comp
 
-        comp.BPR_des = 2.2285
+        comp.BPR = 2.2285
         comp.MNexit1_des = 1.00
         comp.MNexit2_des = 1.00
         comp.design = True
@@ -89,8 +102,6 @@ class CompressorTestCase(unittest.TestCase):
         comp.run()
         assert_rel_error(self,comp.Fl_O1.Mach, .76922 ,TOL)
         assert_rel_error(self,comp.Fl_O2.Mach, .76922 ,TOL)
-
-
 
 
         

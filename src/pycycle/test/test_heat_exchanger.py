@@ -22,7 +22,7 @@ class HeatBalance(Assembly):
         #hx.Wh = 0.49
         #hx.Cp_hot = 1.006
         #hx.T_hot_in = 791
-        fs = flowstation.AirFlowStation()
+        fs = flowstation.FlowStation()
         fs.setTotalTP(1423.8, 0.302712118187) #R, psi
         fs.W = 1.0
         hx.Fl_I = fs
