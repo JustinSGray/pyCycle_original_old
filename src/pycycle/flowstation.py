@@ -194,7 +194,7 @@ class FlowStation(VariableTree):
     def setReactant(self, i):
     	self._species= [0,0,0,0,0,0]
         self._species[i-1] = 1
-        
+              
     #set the compositon to air with water
     def setWAR(self, WAR):
         self._trigger=1
@@ -227,7 +227,7 @@ class FlowStation(VariableTree):
         self._setComp()    
         self._trigger=1
         self.Tt=Tin
-        self.Pt=Pin                
+        self.Pt=Pin
         self._flow.set(T=Tin*5./9., P=Pin*6894.75729)
         self._flow.equilibrate('TP')
         self._total_calcs()
@@ -238,9 +238,14 @@ class FlowStation(VariableTree):
         self._trigger=1 
         self.ht=hin
         self.Pt=Pin
-        self._flow.set(H=hin/.0004302099943161011, P=Pin*6894.75729)
-        self._flow.equilibrate('HP')
-        self._total_calcs()
+        
+        def f(Tt):
+            self._flow.set(T=Tt*5./9., P=Pin*6894.75729)
+            self._flow.equilibrate('TP') 
+            return hin - self._flow.enthalpy_mass()*0.0004302099943161011
+  
+        secant(f, self.Tt, x_min=0 )
+        self._total_calcs()               
 
 
     #set total condition based on S and P

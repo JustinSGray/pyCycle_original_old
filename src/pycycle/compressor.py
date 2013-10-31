@@ -50,8 +50,10 @@ class Compressor(CycleComponent):
             #Design Calculations
             Pt_out = self.Fl_I.Pt*self.PR_des
             self.PR = self.PR_des
+            fs_ideal.copy_from( Fl_I );
             fs_ideal.setTotalSP(Fl_I.s, Pt_out)
             ht_out = (fs_ideal.ht-Fl_I.ht)/self.eff_des + Fl_I.ht
+            Fl_O.copy_from( fs_ideal )
             Fl_O.setTotal_hP(ht_out, Pt_out)
             Fl_O.Mach = self.MNexit_des
             self._exit_area_des = Fl_O.area
@@ -63,8 +65,10 @@ class Compressor(CycleComponent):
             self.eff = self.eff_des #TODO: add in eff variation with W
             #Operational Conditions
             Pt_out = Fl_I.Pt*self.PR
+            fs_ideal.copy_from( Fl_I );
             fs_ideal.setTotalSP(Fl_I.s, Pt_out)
             ht_out = (fs_ideal.ht-Fl_I.ht)/self.eff + Fl_I.ht
+            Fl_O.copy_from( fs_ideal )            
             Fl_O.setTotal_hP(ht_out, Pt_out)
             Fl_O.area = self._exit_area_des #causes Mach to be calculated based on fixed area
 
