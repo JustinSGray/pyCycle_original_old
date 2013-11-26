@@ -16,6 +16,8 @@ class Turbine(CycleComponent):
     eff_des = Float( 0., iotype="in", desc="adiabatic efficiency at the design condition")
  
     Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to compressor", copy=None)
+    Fl_bld1 = FlowStationVar(iotype="in", desc="bleed entering the front of the turbine", copy=None)
+    Fl_bld2 = FlowStationVar(iotype="in", desc="bleed entering the exit of the turbine", copy=None)
 
     PR = Float(iotype="out", desc="pressure ratio at operating conditions")
     eff = Float(iotype="out", desc="adiabatic efficiency at the operating condition")
@@ -28,14 +30,16 @@ class Turbine(CycleComponent):
 
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O
+        Fl_bld1 = self.Fl_bld1
+        Fl_bld2 = self.Fl_bld2
         Fl_O.copy_from( Fl_I )
         fs_ideal = FlowStation()
         Fl_O.W = Fl_I.W
         
+        Fl_O.add( Fl_bld1 )
         
         if self.run_design: 
             #Design Calculations
-            Fl_O.copy_from( Fl_I )
             fs_ideal.copy_from( Fl_I )
             Pt_out = self.Fl_I.Pt/self.PR
             fs_ideal.setTotalSP(Fl_I.s, Pt_out)
@@ -50,8 +54,9 @@ class Turbine(CycleComponent):
         delta_s = Fl_O.s - Fl_I.s
         self.eff_poly = C/(C+delta_s)
         self.pwr = Fl_I.W*(Fl_I.ht - Fl_O.ht) * 1.4148532 #btu/s to hp 
- 
-
+  
+        Fl_O.add( Fl_bld2 )
+        
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
 
