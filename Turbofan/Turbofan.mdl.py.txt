@@ -1,0 +1,34 @@
+  def configure(self):
+
+        #component definition
+        fc = self.add('fc', FlightConditions())
+        inlet = self.add('inlet', Inlet()
+        fan = self.add('fan', Compressor())
+        split = self.add( 'split', Splitter())
+        bypduct = self.add( 'bypduct', Duct())
+        bypnoz = seld.add( 'bypnoz', Nozzle())
+        lpc = self.add( 'lpc', Compressor())
+        hpc = self.add( 'hpc', Compressor())
+        burner = self.add( 'burner', Burner())
+        hpt = self.add( 'hpt', Turbine())
+        lpt = self.add( 'lpt' Turbine())
+        prinoz = self.add( 'prinoz', Nozzle())
+
+        #inter component connections
+        self.connect( 'fc.Fl_O', 'inlet.Fl_I' )
+        self.connet( 'inlet.Fl_O', 'fan.Fl_I' )
+        self.connect( 'fan.Fl_O', 'split.Fl_I' )
+        self.connect( 'split.Fl_O2', 'bypduct.Fl_I' )
+        self.connect( 'bypduct.Fl_O', 'bypnpoz.Fl_I )
+        self.connect( 'split.Fl_O1, 'lpc.Fl_I' )
+        self.connect( 'lpc.Fl_O', 'hpc.Fl_I' )
+        self.coonect( 'hpc.Fl_O', 'burner.Fl_I' )
+        self.connect( 'burner.Fl_O',  'hpt.Fl_I')
+        self.connect( 'hpt.Fl_O', 'lpt.Fl_I' )
+        self.connect( 'lpt.Fl_O', 'prinoz.Fl_I' )
+        self.connect( 'hpc.bld1', 'hpt.bld1' )
+        self.connect( 'hpc.bld2', 'hpt.bld2' )
+        self.connect( 'hpt.Fl_O', 'prinoz.Fl_I' )
+        
+        
+        

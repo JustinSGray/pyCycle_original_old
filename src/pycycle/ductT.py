@@ -27,12 +27,7 @@ class Duct(CycleComponent):
         Fl_O.setTotal_hP(Fl_I.ht+q, Pt_out)
         Fl_O.W = Fl_I.W
 
-        if self.run_design: 
-            Fl_O.Mach = self.MNexit_des
-            self._exit_area_des = Fl_O.area
-        else: 
-            Fl_O.area = self._exit_area_des
-
+  
 
 
 
