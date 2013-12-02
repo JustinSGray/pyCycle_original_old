@@ -12,16 +12,17 @@ import pycycle #used to find file paths
 GAS_CONSTANT = 0.0685592 #BTU/lbm-R
 
 #secant solver with a limit on overall step size
-def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15 ):
+def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15, maxdx = 1e15 ):
     if x0 >= 0:
-        x1 = x0*(1 + 1e-4) + 1e-4
+        x1 = x0*(1 + 1e-2) + 1e-2
     else:
-        x1 = x0*(1 + 1e-4) - 1e-4
+        x1 = x0*(1 + 1e-2) - 1e-2
     f1, f = func(x1), func(x0)
     if (abs(f) > abs(f1)):
         x1, x0 = x0, x1 
         f1, f = f, f1
     dx = f * (x0 - x1) / float(f - f1)  
+    
     count = 0  
     while 1:
         if abs(dx) < TOL * (1 + abs(x0)): 
@@ -29,6 +30,9 @@ def secant(func, x0, TOL=1e-7, x_min=1e15, x_max=1e15 ):
             return x0 -dx
         dx = f * (x0 - x1) / float(f - f1)  
         df = abs((f1-f)/(f+1e-10))      
+        
+        if abs( dx ) > maxdx:
+            dx = maxdx*dx/abs(dx)
 
         if x0-dx < x_min: 
             #x1, x0 = x0, x0*(1+.01*abs(dx)/dx)
@@ -84,15 +88,14 @@ class FlowStation(VariableTree):
         _dir = dirname(pycycle.__file__)
         _prop_file = join(_dir,'gri1000.cti')
 
-
         self.reactantNames=[[0 for x in xrange(6)] for x in xrange(6)]
         self.reactantSplits=[[0 for x in xrange(6)] for x in xrange(6)]
         self.numreacts = 0
         self._trigger = 0
         self._species=[1.0, 0, 0, 0, 0, 0, 0, 0]
-        self._mach_or_area=0    
+        self._mach_or_area=0 
         self._flow=importPhase(_prop_file)
-        self._flowS=importPhase(_prop_file)
+        self._flow=importPhase(_prop_file)
 
     #add a reactant that can be mixed in
     @staticmethod
@@ -145,10 +148,9 @@ class FlowStation(VariableTree):
 
     def _setComp(self):
  
- 
-        global reactantNames 
-        global reactantSplits 
-        global numreacts
+        #global reactantNames 
+        #global reactantSplits 
+        #global numreacts
      
         tempcomp = ''
         compname    = ['', '', '', '', '', '', '', '', '', '', '', '']
@@ -178,7 +180,7 @@ class FlowStation(VariableTree):
              if fract[count1] > .000001:
                  tempcomp = tempcomp + str(compname[count1])+':' +str(fract[count1])+ ' '
              count1 = count1 - 1
-            
+        self._flow.setMassFractions( tempcomp )
         self._flow.setMassFractions( tempcomp )
 
 
@@ -194,7 +196,7 @@ class FlowStation(VariableTree):
     def setReactant(self, i):
     	self._species= [0,0,0,0,0,0]
         self._species[i-1] = 1
-        
+              
     #set the compositon to air with water
     def setWAR(self, WAR):
         self._trigger=1
@@ -214,10 +216,10 @@ class FlowStation(VariableTree):
         self.Cp = self._flow.cp_mass()*2.388459e-4
         self.Cv = self._flow.cv_mass()*2.388459e-4
         self.gamt=self.Cp/self.Cv
-        self._flowS=self._flow 
+        #self._flow=self._flow
         self.setStatic()
         self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)    
-        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flow.temperature()/self._flow.meanMolecularWeight())*3.28084
 
         #self.mu = self._flow.viscosity()*0.671968975    
         self._trigger=0
@@ -227,7 +229,7 @@ class FlowStation(VariableTree):
         self._setComp()    
         self._trigger=1
         self.Tt=Tin
-        self.Pt=Pin                
+        self.Pt=Pin
         self._flow.set(T=Tin*5./9., P=Pin*6894.75729)
         self._flow.equilibrate('TP')
         self._total_calcs()
@@ -238,9 +240,13 @@ class FlowStation(VariableTree):
         self._trigger=1 
         self.ht=hin
         self.Pt=Pin
-        self._flow.set(H=hin/.0004302099943161011, P=Pin*6894.75729)
-        self._flow.equilibrate('HP')
-        self._total_calcs()
+        def f(Tt):
+            self._flow.set(T=Tt*5./9., P=Pin*6894.75729)
+            self._flow.equilibrate('TP') 
+            return hin - self._flow.enthalpy_mass()*0.0004302099943161011
+        secant(f, self.Tt, x_min=0 )
+        
+        self._total_calcs()               
 
 
     #set total condition based on S and P
@@ -278,6 +284,7 @@ class FlowStation(VariableTree):
                     
     def copy_from(self, FS2):
         """duplicates total properties from another flow station""" 
+        self._species = FS2._species[:]
         self.ht=FS2.ht
         self.Tt=FS2.Tt
         self.Pt=FS2.Pt
@@ -288,10 +295,7 @@ class FlowStation(VariableTree):
         self.FAR =FS2.FAR
         self.WAR =FS2.WAR
         temp =""
-        for i in range(0, len(self.reactants)):
-                self._species[i]=FS2._species[i]
-                temp=temp+self.reactants[i]+":"+str(self._species[i])+" "
-        self._flow.setMassFractions(temp)
+        self._setComp()
         self._flow.set(T=self.Tt*5./9., P=self.Pt*6894.75729)
         self._flow.equilibrate('TP')
                     
@@ -331,15 +335,21 @@ class FlowStation(VariableTree):
 
     #set the statics based on pressure
     def setStaticPs(self):
-        self._flowS=self._flow 
-        self._flowS.set(S=self.s/0.000238845896627, P=self.Ps*6894.75729) 
-        self._flowS.equilibrate('SP')
-        self.Ts=self._flowS.temperature()*9./5.
-        self.rhos=self._flowS.density()*.0624
-        self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
-        self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011 
+
+        def f(Ts): 
+            self._setComp()                   
+            self._flow.set(T=Ts*5./9., P=self.Ps*6894.75729 )
+            self._flow.equilibrate('TP') 
+            return self.s  - self._flow.entropy_mass()*0.000238845896627
+  
+        secant(f, self.Ts, x_min=200,x_max =  5000,maxdx = 5000 )   
+        
+        self.Ts=self._flow.temperature()*9./5.
+        self.rhos=self._flow.density()*.0624
+        self.gams=self._flow.cp_mass()/self._flow.cv_mass() 
+        self.hs=self._flow.enthalpy_mass()*0.0004302099943161011 
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
-        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flow.temperature()/self._flow.meanMolecularWeight())*3.28084
         self.Mach=self.Vflow / self.Vsonic
         self.area= self.W / (self.rhos*self.Vflow)*144. 
 
