@@ -21,8 +21,10 @@ class Duct(CycleComponent):
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O 
 
+        print 'asd'
         Pt_out = Fl_I.Pt*(1-self.dPqP)
         q = self.Q_dot/Fl_I.W
+        Fl_O.copy_from( Fl_I )
         Fl_O.setTotal_hP(Fl_I.ht+q, Pt_out)
         Fl_O.W = Fl_I.W
 

@@ -37,19 +37,22 @@ class FlightConditions(CycleComponent):
         h = self.alt/3280.84*REARTH/(self.alt/3280.84+REARTH)	
 
         i = 0
-        while ( h > htab[i+1] ):
+        while ( h > htab[i] ):
            i = i + 1
  
+        i = i - 1
+    
         tbase = ttab[i]*9/5
         tgrad = gtab[i]    
         deltah=h-htab[i]
         Ts=tbase+tgrad*deltah*9/5
+        
         if (tgrad == 0. ):
            Ps = ptab[i]*math.exp(-GMR*deltah/tbase*9./5.)*14.696
         else:
            Ps =ptab[i]*((tbase/Ts)**(GMR/tgrad))*14.696
 
-    
+      
         Ts = self.dTs + Ts
         Fl_O.W = self.Wout
         Fl_O.setWAR( self.WAR )
@@ -61,7 +64,7 @@ class FlightConditions(CycleComponent):
 
 
 
-        Fram = Fl_O.Vflow*Fl_O.W/32.174
+        self.Fram = Fl_O.Vflow*Fl_O.W/32.174
 
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top

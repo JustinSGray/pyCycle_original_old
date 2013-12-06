@@ -23,6 +23,10 @@ class Turbine(CycleComponent):
     eff = Float(iotype="out", desc="adiabatic efficiency at the operating condition")
     eff_poly = Float(iotype="out", desc="polytropic efficiency at the operating condition")
     pwr = Float(iotype="out", units="hp", desc="power required to run the compressor at the operating condition")
+   
+    Nmech = Float( 10000., iotype="in", desc="Mechanical speed")
+    trq = Float( 0., iotype="out", desc="trq") 
+    
     Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
  
 
@@ -32,29 +36,32 @@ class Turbine(CycleComponent):
         Fl_O = self.Fl_O
         Fl_bld1 = self.Fl_bld1
         Fl_bld2 = self.Fl_bld2
-        Fl_O.copy_from( Fl_I )
-        fs_ideal = FlowStation()
-        Fl_O.W = Fl_I.W
-        
-        Fl_O.add( Fl_bld1 )
-        
-        if self.run_design: 
-            #Design Calculations
-            fs_ideal.copy_from( Fl_I )
-            Pt_out = self.Fl_I.Pt/self.PR
-            fs_ideal.setTotalSP(Fl_I.s, Pt_out)
-            ht_out =  Fl_I.ht - ( Fl_I.ht - fs_ideal.ht )*self.eff_des;
-            Fl_O.setTotal_hP(ht_out, Pt_out)
-            Fl_O.Mach = self.MNexit_des
-            self._exit_area_des = Fl_O.area
-            self._Wc_des = Fl_I.Wc
 
-   
+        F41 = FlowStation()
+        F48 = FlowStation()
+        fs_ideal = FlowStation()
+
+        
+        F41.copy_from( Fl_I )
+        F41.add( Fl_bld1 )
+        fs_ideal.copy_from( F41 )
+        F48.copy_from( F41 )
+
+        #Design Calculations
+        #fs_ideal.copy_from( Fl_O )
+        Pt_out = self.Fl_I.Pt/self.PR
+        fs_ideal.setTotalSP(F41.s, Pt_out)
+
+        ht_out =  F41.ht - ( F41.ht - fs_ideal.ht )*self.eff;
+        F48.setTotal_hP(ht_out, Pt_out)
+        
         C = GAS_CONSTANT*math.log(self.PR)
         delta_s = Fl_O.s - Fl_I.s
         self.eff_poly = C/(C+delta_s)
-        self.pwr = Fl_I.W*(Fl_I.ht - Fl_O.ht) * 1.4148532 #btu/s to hp 
-  
+        self.pwr = (F41.W)*(F41.ht - Fl_O.ht) * 1.4148532 #btu/s to hp 
+        self.trq =  550. * self.pwr / self.Nmech;
+ 
+        Fl_O.copy_from( F48 )
         Fl_O.add( Fl_bld2 )
         
 if __name__ == "__main__": 
@@ -63,4 +70,4 @@ if __name__ == "__main__":
     c = set_as_top(Turbine())
     c.run()
 
-
+ 

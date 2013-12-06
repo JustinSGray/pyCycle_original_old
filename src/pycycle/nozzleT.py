@@ -10,14 +10,14 @@ class Nozzle(CycleComponent):
  
     PsExh = Float(0., iotype="in", units = "lbf/inch**2",desc="Exhaust static pressure")
     Ath = Float(0., iotype="in", units = "inch**2",desc="Nozzle throat area")
-    Cfg = Float(0., iotype="in",desc="Coefficient gross thrust")
+    Cfg = Float(1., iotype="in",desc="Coefficient gross thrust")
     Fg = Float(0., iotype="in", units = "lbf",desc="Gross Thrust")
      
     Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to nozzle", copy=None)
     Fl_Th = FlowStationVar(iotype="in", desc="Nozzle throat conditions", copy=None) 
  
     def execute(self): 
-    	 print 'running nozzle'
+  
          # set the throat conditions based on MN
          Fl_I= self.Fl_I
          Fl_Th = self.Fl_Th
@@ -31,10 +31,10 @@ class Nozzle(CycleComponent):
             Ath = Fl_Th.W / ( Fl_Th.rhos * Fl_Th.Vflow)*144.;
          else:
             print self.PsExh
-            #Ath = Fl_Th.W / ( Fl_Th.rhos * Fl_Th.Vflow )*144.;
-            # store area for use in off-design            
-         Fg   = ( Fl_Th.W / 32.174 ) * Fl_Th.Vflow + ( Fl_Th.Ps - self.PsExh ) * Fl_Th.area*self.Cfg
-
+            Ath = Fl_Th.W / ( Fl_Th.rhos * Fl_Th.Vflow )*144.;
+            # store area for use in off-design    
+            
+         self.Fg   = ( Fl_Th.W / 32.174 ) * Fl_Th.Vflow + ( Fl_Th.Ps - self.PsExh ) * Fl_Th.area*self.Cfg
 
      
 if __name__ == "__main__": 

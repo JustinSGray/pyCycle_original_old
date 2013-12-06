@@ -404,20 +404,36 @@ class FlowStation(VariableTree):
     #set the statics based on Ts, Ps, and MN
     #UPDGRAEDE TO USE LOOPS
     def setStaticTsPsMN(self, Ts, Ps, MN): 
-        self._trigger=1 
-
-        self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
-        self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
-        self.setTotalTP(self.Tt, self.Pt)
-
-        #do this once more beacause gamt changed... very crude iteration
-        self.Tt=Ts*(1+(self.gamt - 1) /2.* MN**2)
-        self.Pt=Ps*(1+(self.gamt - 1) /2.* MN**2)**(self.gamt /(self.gamt -1))
-        self.setTotalTP(self.Tt, self.Pt)
-
+        
+        self._setComp()    
         self._trigger=1
+        self.Ts=Ts
+        self.Ps=Ps
+        self._flow.set(T=Ts*5./9., P=Ps*6894.75729)
+        self._flow.equilibrate('TP')
+        self.hs=self._flow.enthalpy_mass()*0.0004302099943161011
+        self.s=self._flow.entropy_mass()*0.000238845896627
+        self.rhos=self._flow.density()*.0624
+        self.Ts=Ts
+        self.Cp = self._flow.cp_mass()*2.388459e-4
+        self.Cv = self._flow.cv_mass()*2.388459e-4
+        self.gams=self.Cp/self.Cv
+        MMW = self._flow.meanMolecularWeight()
+        Vson = math.sqrt( self.gams*self.Ts*1544/MMW*32.174 )
+        Vflow = MN*Vson;
+        ht = self.hs + (Vflow)**2/(  778.169 * 32.1740 * 2 );
+
+        Tt=Ts*(1+(self.gams - 1) /2.* MN**2)
+        Pt=Ps*(1+(self.gams - 1) /2.* MN**2)**(self.gams /(self.gams -1))
+
+        def f(Pti):
+            self.Pt = Pti
+            self.setTotalSP(self.s, Pti)
+            return ht - self.ht
+        secant(f,  Pt, x_min=0, x_max=Pt*2 )
+
+     
         self.Mach=MN 
-        self.setStaticMach()
         self.area= self.W / (self.rhos * self.Vflow)*144. 
         self._trigger=0
 

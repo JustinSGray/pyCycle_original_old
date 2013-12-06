@@ -22,8 +22,8 @@ class SplitterBPR(CycleComponent):
         Fl_I = self.Fl_I
         Fl_O1 = self.Fl_O1
         Fl_O2 = self.Fl_O2
-        Fl_O1.copy_from( Fl_I )
-        Fl_O2.copy_from( Fl_I )
+        #Fl_O1.copy_from( Fl_I )
+        #Fl_O2.copy_from( Fl_I )
 
         Fl_O1.W = Fl_I.W/(self.BPR+1)
         Fl_O2.W = Fl_O1.W*self.BPR
