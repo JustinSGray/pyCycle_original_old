@@ -43,10 +43,6 @@ class FlowStartStatic(CycleComponent):
 
 
 
-if __name__ == "__main__": 
-    from openmdao.main.api import set_as_top
 
-    c = set_as_top(Start())
-    c.run()
 
 

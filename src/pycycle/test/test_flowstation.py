@@ -2,8 +2,43 @@
 import unittest
 
 from openmdao.util.testutil import assert_rel_error
+from openmdao.main.api import Assembly, set_as_top
 
 from pycycle.flowstation import FlowStation
+
+from pycycle.cycle_component import CycleComponent
+from pycycle.flowstation import FlowStation, FlowStationVar, GAS_CONSTANT
+
+
+class DummyComp(CycleComponent): 
+    Fl_I = FlowStationVar(iotype="in", copy=None)
+    Fl_O = FlowStationVar(iotype="out", copy=None)
+
+    def execute(self): 
+        Fl_I = self.Fl_I
+        #self.Fl_O = FlowStation()
+        self.Fl_O.copy_from(Fl_I)
+        self.Fl_O.setTotalTP(518,14.7)
+
+
+class FlowStationCopyWithCompTestCase(unittest.TestCase): 
+
+    def test_copy_flow(self): 
+        a = set_as_top(Assembly())
+        a.add('comp1', DummyComp())
+        a.add('comp2', DummyComp())
+
+        a.connect('comp1.Fl_O', 'comp2.Fl_I')
+        a.driver.workflow.add(['comp1', 'comp2'])
+
+        fs = FlowStation()
+        fs.W = 100
+        fs.setDryAir()
+        fs.setTotalTP(518, 15)
+        a.comp1.Fl_I = fs
+
+        a.run() 
+
 
 
 class FlowStationTestCase(unittest.TestCase):
@@ -107,8 +142,10 @@ class TestBurn(unittest.TestCase):
         assert_rel_error(self,self.fs.W, 102.5, .0001)
         assert_rel_error(self,self.fs.gamt, 1.293336, .0001)
 
-    def test_burn(self):         
+    def test_burn(self): 
+
         self._assert()
+
         
     def test_add( self ):
         self.fs1 = FlowStation()

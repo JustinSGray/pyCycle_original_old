@@ -88,17 +88,14 @@ class FlowStation(VariableTree):
         _dir = dirname(pycycle.__file__)
         _prop_file = join(_dir,'gri1000.cti')
 
-        print self._desc
-
         self.reactantNames=[[0 for x in xrange(6)] for x in xrange(6)]
         self.reactantSplits=[[0 for x in xrange(6)] for x in xrange(6)]
         self.numreacts = 0
         self._trigger = 0
         self._species=[1.0, 0, 0, 0, 0, 0, 0, 0]
         self._mach_or_area=0 
-        print 'initiallizing station'
         self._flow=importPhase(_prop_file)
-        self._flowS=importPhase(_prop_file)
+        self._flow=importPhase(_prop_file)
 
     #add a reactant that can be mixed in
     @staticmethod
@@ -151,9 +148,9 @@ class FlowStation(VariableTree):
 
     def _setComp(self):
  
-        global reactantNames 
-        global reactantSplits 
-        global numreacts
+        #global reactantNames 
+        #global reactantSplits 
+        #global numreacts
      
         tempcomp = ''
         compname    = ['', '', '', '', '', '', '', '', '', '', '', '']
@@ -183,10 +180,8 @@ class FlowStation(VariableTree):
              if fract[count1] > .000001:
                  tempcomp = tempcomp + str(compname[count1])+':' +str(fract[count1])+ ' '
              count1 = count1 - 1
-        
-        print tempcomp
         self._flow.setMassFractions( tempcomp )
-        self._flowS.setMassFractions( tempcomp )
+        self._flow.setMassFractions( tempcomp )
 
 
     #set the composition to dry air
@@ -221,10 +216,10 @@ class FlowStation(VariableTree):
         self.Cp = self._flow.cp_mass()*2.388459e-4
         self.Cv = self._flow.cv_mass()*2.388459e-4
         self.gamt=self.Cp/self.Cv
-        self._flowS=self._flow 
+        #self._flow=self._flow
         self.setStatic()
         self.Wc = self.W*(self.Tt/518.67)**.5/(self.Pt/14.696)    
-        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flow.temperature()/self._flow.meanMolecularWeight())*3.28084
 
         #self.mu = self._flow.viscosity()*0.671968975    
         self._trigger=0
@@ -245,9 +240,7 @@ class FlowStation(VariableTree):
         self._trigger=1 
         self.ht=hin
         self.Pt=Pin
-        print '$$$$$$$$$$$$$$$$$$$$$$$$$',self.Tt
         def f(Tt):
-            print '******************',Tt        	
             self._flow.set(T=Tt*5./9., P=Pin*6894.75729)
             self._flow.equilibrate('TP') 
             return hin - self._flow.enthalpy_mass()*0.0004302099943161011
@@ -291,8 +284,7 @@ class FlowStation(VariableTree):
                     
     def copy_from(self, FS2):
         """duplicates total properties from another flow station""" 
-        self._species = FS2._species
-        print 'speciesssssssssssssssssssssss', self._species
+        self._species = FS2._species[:]
         self.ht=FS2.ht
         self.Tt=FS2.Tt
         self.Pt=FS2.Pt
@@ -303,7 +295,6 @@ class FlowStation(VariableTree):
         self.FAR =FS2.FAR
         self.WAR =FS2.WAR
         temp =""
-        print 'ggggggggggggggggggggggg',self.Tt
         self._setComp()
         self._flow.set(T=self.Tt*5./9., P=self.Pt*6894.75729)
         self._flow.equilibrate('TP')
@@ -347,19 +338,18 @@ class FlowStation(VariableTree):
 
         def f(Ts): 
             self._setComp()                   
-            self._flowS.set(T=Ts*5./9., P=self.Ps*6894.75729 )
-            self._flowS.equilibrate('TP') 
-            print 'bung', Ts, self.s, self._flowS.entropy_mass()*0.000238845896627,self._flow.entropy_mass(), self.Pt, self.Ps, self.Tt, self.Ts
-            return self.s  - self._flowS.entropy_mass()*0.000238845896627
+            self._flow.set(T=Ts*5./9., P=self.Ps*6894.75729 )
+            self._flow.equilibrate('TP') 
+            return self.s  - self._flow.entropy_mass()*0.000238845896627
   
         secant(f, self.Ts, x_min=200,x_max =  5000,maxdx = 5000 )   
         
-        self.Ts=self._flowS.temperature()*9./5.
-        self.rhos=self._flowS.density()*.0624
-        self.gams=self._flowS.cp_mass()/self._flowS.cv_mass() 
-        self.hs=self._flowS.enthalpy_mass()*0.0004302099943161011 
+        self.Ts=self._flow.temperature()*9./5.
+        self.rhos=self._flow.density()*.0624
+        self.gams=self._flow.cp_mass()/self._flow.cv_mass() 
+        self.hs=self._flow.enthalpy_mass()*0.0004302099943161011 
         self.Vflow=(778.169*32.1740*2*(self.ht-self.hs))**.5
-        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flowS.temperature()/self._flowS.meanMolecularWeight())*3.28084
+        self.Vsonic=math.sqrt(self.gams*GasConstant*self._flow.temperature()/self._flow.meanMolecularWeight())*3.28084
         self.Mach=self.Vflow / self.Vsonic
         self.area= self.W / (self.rhos*self.Vflow)*144. 
 

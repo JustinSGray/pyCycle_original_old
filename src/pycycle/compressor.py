@@ -11,7 +11,12 @@ from pycycle.cycle_component import CycleComponent
 class Compressor(CycleComponent): 
     """Axial Compressor performance calculations""" 
 
-    
+    PR_des = Float(12.47, iotype="in", desc="Pressure ratio at design conditions")
+    MNexit_des = Float(.4, iotype="in", desc="mach number at the compressor exit at design conditions")
+    eff_des = Float(.95, iotype="in", desc="adiabatic efficiency at the design condition")
+    hub_to_tip = Float(.4, iotype="in", desc="ratio of hub radius to tip radius")
+    op_slope = Float(.85, iotype="in", desc="")
+
     Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to compressor", copy=None)
 
     PR = Float(iotype="out", desc="pressure ratio at operating conditions")
@@ -21,64 +26,56 @@ class Compressor(CycleComponent):
     Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
     tip_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
     hub_radius = Float(iotype="out", units="inch", desc="radius at the tip of the compressor")
-    Wfrac1 = Float(iotype="in", units="lbm/s", desc="Bleed 1 flow fraction")
-    hfrac1 = Float(iotype="in", units="Btu/lbm", desc="Bleed 1 enthalpy fraction")
-    Pfrac1 = Float(iotype="in", units="lbf/inch**2", desc="Bleed 1 pressure fraction")
-    Wfrac2 = Float(iotype="in", units="lbm/s", desc="Bleed 2 flow fraction")
-    hfrac2 = Float(iotype="in", units="Btu/lbm", desc="Bleed 2 enthalpy fraction")
-    Pfrac2 = Float(iotype="in", units="lbf/inch**2", desc="Bleed 2 pressure fraction")
 
 
-    Fl_O = FlowStationVar( iotype="out",desc="outgoing air stream from compressor", copy=None )
-    Fl_bld1 = FlowStationVar(iotype="out", desc="first bleed port", copy=None )    
-    Fl_bld2 = FlowStationVar(iotype="out", desc="second bleed port", copy=None )   
-    
-   
+    def _op_line(self,Wc): 
+        """relationship between compressor pressure ratio and mass flow""" 
+        b = 1 - self.op_slope #scaled PR and Wc at design are both 1
+        #assume a linear op line, with given slope
+
+        norm_PR = self.op_slope*(Wc/self._Wc_des) + b 
+
+        return norm_PR*self.PR_des
+
+
     def execute(self): 
 
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O
-        Fl_O.copy_from( Fl_I )
-        Fl_bld1 = self.Fl_bld1
-        Fl_bld1.copy_from( Fl_I )
-        Fl_bld2 = self.Fl_bld2
-        Fl_bld2.copy_from( Fl_I )
+        fs_ideal = FlowStation()
+        Fl_O.W = Fl_I.W
         
-        FO_ideal = FlowStation()
-        FO_ideal.copy_from(  Fl_I )
- 
-        PtOut = Fl_I.Pt*self.PR
-        print 'PtOut', PtOut
-        FO_ideal.setTotalSP( Fl_I.s,PtOut )
-
-        htOut = Fl_I.ht + ( FO_ideal.ht - Fl_I.ht )/self.eff
- 
-        # set the exit conditions to knowm enthalpy and pressure
-        Fl_O.setTotal_hP( htOut, PtOut )
-
-        # set the condtions for bleed 1  
-        Wbleed1 = self.Wfrac1*Fl_I.W
-        htBleed1 = Fl_I.ht+ self.hfrac1*( Fl_O.ht - Fl_I.ht )
-        PtBleed1 = Fl_I.Pt + self.Pfrac1*( Fl_O.Pt - Fl_I.Pt )
-        Fl_bld1.setTotal_hP( htBleed1,PtBleed1 )
-        Fl_bld1.W  = Wbleed1
-
-        # set the conditions for bleed 2
-        Wbleed2 = self.Wfrac2*Fl_I.W;
-        htBleed2 = Fl_I.ht+ self.hfrac2*( Fl_O.ht - Fl_I.ht) 
-        PtBleed2 = Fl_I.Pt + self.Pfrac2*( Fl_O.Pt - Fl_I.Pt )
-        Fl_bld2.setTotal_hP( htBleed2,PtBleed2 )
-        Fl_bld2.W  = Wbleed2
-
-        # subtract the bleed flow from the exit flow
-        Wout = Fl_I.W - Fl_bld1.W - Fl_bld2.W
-        Fl_O.W = Wout
-
-        # determine the power
-        pwr = Fl_I.W * (  Fl_I.ht - Fl_O.ht ) * 1.4148;
-        pwr = pwr + Fl_bld1.W*(Fl_bld1.ht-Fl_O.ht)*1.4148 + Fl_bld2.W*(Fl_bld2.ht-Fl_O.ht)*1.4148
         
-  
+        if self.run_design: 
+            #Design Calculations
+            Pt_out = self.Fl_I.Pt*self.PR_des
+            self.PR = self.PR_des
+            fs_ideal.setTotalSP(Fl_I.s, Pt_out)
+            ht_out = (fs_ideal.ht-Fl_I.ht)/self.eff_des + Fl_I.ht
+            Fl_O.setTotal_hP(ht_out, Pt_out)
+            Fl_O.Mach = self.MNexit_des
+            self._exit_area_des = Fl_O.area
+            self._Wc_des = Fl_I.Wc
+
+        else: 
+            #Assumed Op Line Calculation
+            self.PR = self._op_line(Fl_I.Wc)
+            self.eff = self.eff_des #TODO: add in eff variation with W
+            #Operational Conditions
+            Pt_out = Fl_I.Pt*self.PR
+            fs_ideal.setTotalSP(Fl_I.s, Pt_out)
+            ht_out = (fs_ideal.ht-Fl_I.ht)/self.eff + Fl_I.ht
+            Fl_O.setTotal_hP(ht_out, Pt_out)
+            Fl_O.area = self._exit_area_des #causes Mach to be calculated based on fixed area
+
+        C = GAS_CONSTANT*math.log(self.PR)
+        delta_s = Fl_O.s - Fl_I.s
+        self.eff_poly = C/(C+delta_s)
+        self.pwr = Fl_I.W*(Fl_O.ht - Fl_I.ht) * 1.4148532 #btu/s to hp 
+        self.tip_radius = (Fl_O.area/math.pi/(1-self.hub_to_tip**2))**.5
+        self.hub_radius = self.hub_to_tip*self.tip_radius
+
+
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
 
