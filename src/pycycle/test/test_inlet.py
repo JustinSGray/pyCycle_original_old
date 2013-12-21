@@ -4,53 +4,37 @@ import unittest
 from openmdao.main.api import set_as_top
 from openmdao.util.testutil import assert_rel_error
 
-from pycycle import inlet, flowstation
+from pycycle.api import Inlet, FlowStation
 
-class StartTestCase(unittest.TestCase):
 
-    def test_start(self): 
-        comp = set_as_top(inlet.Inlet())
 
-        comp.ram_recovery = 1.0
-        comp.MNexit_des = .6
+class InletTestCase(unittest.TestCase):
 
-        fs = flowstation.FlowStation()
-        fs.W = 1.080
-        fs.setTotalTP(630.75, 0.0272)
-        fs.Mach = 1.0
+  
 
-        comp.Fl_I = fs
+    def tearDown(self): 
+        comp = None
 
-        comp.design = True
-        comp.run()
-
-        assert_rel_error(self,comp.Fl_O.W, 1.080, .005)
-        assert_rel_error(self,comp.Fl_O.Pt, .0272, .005)
-        assert_rel_error(self,comp.Fl_O.Tt, 630.75, .005)
-        assert_rel_error(self,comp.Fl_O.rhos, .000098, .005)
-        assert_rel_error(self,comp.Fl_O.Mach, 0.6, .005)
-        assert_rel_error(self,comp.Fl_O.area, 2230.8, .005)
-
-        #check off design 
-        comp.run()
-
-        assert_rel_error(self,comp.Fl_O.W, 1.080, .005)
-        assert_rel_error(self,comp.Fl_O.Pt, .0272, .005)
-        assert_rel_error(self,comp.Fl_O.Tt, 630.75, .005)
-        assert_rel_error(self,comp.Fl_O.rhos, .000098, .005)
-        assert_rel_error(self,comp.Fl_O.Mach, 0.6, .005)
-        assert_rel_error(self,comp.Fl_O.area, 2230.8, .005)
-
-        #vary something
-        comp.Fl_I.W = .9
-        comp.run()
-
-        assert_rel_error(self,comp.Fl_O.W, .9, .005)
-        assert_rel_error(self,comp.Fl_O.Pt, .0272, .005)
-        assert_rel_error(self,comp.Fl_O.Tt, 630.75, .005)
-        assert_rel_error(self,comp.Fl_O.Mach, 0.45955, .005)
-        assert_rel_error(self,comp.Fl_O.area, 2230.8, .005)
+    def test_duct(self): 
+    	   
+    	# initial test case based on JT9D 34000 .8 operation    
+    	self.inlet = set_as_top(Inlet())
+        self.fs = FlowStation()
+        self.fs.W = 100.
+        self.fs.setTotalTP( 1000, 100 );
         
+        inlet = self.inlet       
+        inlet.Fl_I = self.fs 
+        inlet.ram_recovery = .9
+        inlet.run()
+
+        TOL = .001
+        
+        # check the flow and mechanical values
+        assert_rel_error( self, inlet.Fl_O.W, 100., TOL )
+        assert_rel_error( self, inlet.Fl_O.Pt, 90., TOL )
+        assert_rel_error( self, inlet.Fl_O.Tt, 1000., TOL )
+
 if __name__ == "__main__":
     unittest.main()
     
