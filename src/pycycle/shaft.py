@@ -6,15 +6,14 @@ from pycycle.cycle_component import CycleComponent
 
 
 class Shaft(CycleComponent): 
-    """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
-    to a slower mach number and larger area"""
+    """This componet serves as the torque balancing part of the shaft element"""
 
-    Nmech = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")
+    Nmech = Float( 0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure", units='rpm' )
  
-    trq1 = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")
-    trq2 = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")  
-    trq3 = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")
-    trqNet = Float(0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure")
+    trq1 = Float( 0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure", units='ft*lbf' )
+    trq2 = Float( 0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure", units='ft*lbf' )  
+    trq3 = Float( 0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure", units='ft*lbf' )
+    trqNet = Float( 0.0, iotype="in", desc="pressure differential as a fraction of incomming pressure", units='ft*lbf'  )
 
     
     def execute(self): 
@@ -23,18 +22,15 @@ class Shaft(CycleComponent):
 
 
 class Nmech(CycleComponent): 
-    """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
-    to a slower mach number and larger area"""
+    """This component serves as the model hub for the speed (usually set from the sovler)"""
 
-    Nmech = Float(0.0, iotype="out", desc="pressure differential as a fraction of incomming pressure")
+    Nmech = Float( 0.0, iotype="out", desc="pressure differential as a fraction of incomming pressure", units='rpm' )
 
     def execute(self): 
         self.Nmech = self.Nmech
   
-
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top
 
-    c = set_as_top(Inlet())
+    c = set_as_top(Shaft())
     c.run()
-

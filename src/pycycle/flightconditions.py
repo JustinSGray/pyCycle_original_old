@@ -10,20 +10,20 @@ class FlightConditions(CycleComponent):
     """This element determines the flow conditions based on input altitude, Mach number,
        and dTs"""
 
-    alt = Float(0., iotype="in", desc="input altitude", units="ft")
-    MN = Float(0., iotype="in", desc="input Mach number")
-    dTs = Float(iotype="in", desc="input ambient altitude delta", units="R")
-    WAR = Float(iotype="in", desc="Water to air ratio", units="R")
-    Wout = Float(iotype="in", desc="Weight flow", units="lbm/s")    
-    Fram = Float(iotype="in", desc="Ram drag", units="lbf")
+    alt = Float( 0., iotype="in", desc="input altitude", units="ft" )
+    MN = Float( 0., iotype="in", desc="input Mach number" )
+    dTs = Float( 0., iotype="in", desc="input ambient altitude delta", units="R" )
+    WAR = Float( 0., iotype="in", desc="Water to air ratio" )
+    Wout = Float( 0., iotype="in", desc="Weight flow", units="lbm/s" )    
+    Fram = Float( 0., iotype="in", desc="Ram drag", units="lbf" ) 
   
- 
     Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
 
     def execute(self): 
     	
     	Fl_O = self.Fl_O;
     	
+    	# data that describes the atmosphere
         REARTH = 6369.0
         GMR = 34.163195
         htab = ( 0.0,  11.0, 20.0, 32.0, 47.0, 51.0, 71.0, 84.852 )
@@ -34,36 +34,38 @@ class FlightConditions(CycleComponent):
         Ts=0
         Ps=0
 
+        # calculate geopotential altitude
         h = self.alt/3280.84*REARTH/(self.alt/3280.84+REARTH)	
 
+        # determine where in the h table we are
         i = 0
-        while ( h > htab[i] ):
+        while ( h >= htab[i] ):
            i = i + 1
- 
+        
+        # grab the values from the table
         i = i - 1
-    
         tbase = ttab[i]*9/5
         tgrad = gtab[i]    
         deltah=h-htab[i]
-        Ts=tbase+tgrad*deltah*9/5
         
+        # determine Ps and Ts
+        Ts=tbase+tgrad*deltah*9/5
         if (tgrad == 0. ):
            Ps = ptab[i]*math.exp(-GMR*deltah/tbase*9./5.)*14.696
         else:
-           Ps =ptab[i]*((tbase/Ts)**(GMR/tgrad))*14.696
-
-      
+           Ps = ptab[i]*((tbase/Ts)**(GMR/tgrad))*14.696
         Ts = self.dTs + Ts
+
+        # set the exit conditions in the port
         Fl_O.W = self.Wout
         Fl_O.setWAR( self.WAR )
-
         if ( self.MN > 0 ):
            Fl_O.setStaticTsPsMN( Ts, Ps, self.MN )
         else:
            Fl_O.setTotalTP( Ts, Ps )
+           Fl_O.Mach = 0.
 
-
-
+        #determine the ram drag
         self.Fram = Fl_O.Vflow*Fl_O.W/32.174
 
 if __name__ == "__main__": 

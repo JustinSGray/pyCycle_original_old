@@ -6,36 +6,25 @@ from pycycle.cycle_component import CycleComponent
 
 
 class Inlet(CycleComponent): 
-    """The inlet takes in air at a given flow rate and mach number, and diffuses it down 
-    to a slower mach number and larger area"""
+    """This simple inlet applies a ram recovery (pressure drop) to the flow"""
 
-    ram_recovery = Float(1.000, iotype="in", desc="fraction of the total pressure retained")
-    MNexit_des = Float(.6, iotype="in", desc="mach number at the exit of the inlet")
-
-    A_capture = Float(iotype="in", desc="area at the entrance plane to the inlet", units="inch**2")
-    Fl_I = FlowStationVar(iotype="in", desc="incoming air stream to compressor", copy=None)
-    Fl_O = FlowStationVar(iotype="out", desc="outgoing air stream from compressor", copy=None)
-    F_ram = Float(iotype="out", desc="ram drag from the inlet", units="lbf")
+    ram_recovery = Float( 1.000, iotype="in", desc="fraction of the total pressure retained" )
+    
+    Fl_I = FlowStationVar( iotype="in", desc="incoming air stream to compressor", copy=None )
+    Fl_O = FlowStationVar( iotype="out", desc="outgoing air stream from compressor", copy=None )
+ 
 
 
     def execute(self): 
         Fl_I = self.Fl_I
         Fl_O = self.Fl_O 
-
+        Fl_O.copy_from( Fl_I )
+        
+        #determine the exit pressure 
         Pt_out = Fl_I.Pt*self.ram_recovery
-        Fl_O.setTotalTP(Fl_I.Tt, Pt_out)
-        Fl_O.W = Fl_I.W
-
-        self.F_ram = Fl_I.W*Fl_I.Vflow/32.174 #lbf
-
-        if self.run_design: 
-            Fl_O.Mach = self.MNexit_des
-            self._exit_area_des = Fl_O.area
-            self.A_capture = Fl_I.area
-        else: 
-            Fl_O.area = self._exit_area_des
-
-
+        
+        #set the conditions in the exit port
+        Fl_O.setTotal_hP(Fl_I.ht, Pt_out)
 
 if __name__ == "__main__": 
     from openmdao.main.api import set_as_top

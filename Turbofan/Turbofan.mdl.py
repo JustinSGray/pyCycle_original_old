@@ -5,8 +5,8 @@ from openmdao.lib.casehandlers.api import DumpCaseRecorder
 from openmdao.lib.datatypes.api import Float
 from openmdao.lib.drivers.api import BroydenSolver
 
-from pycycle.api import (FlightConditions, Inlet, SplitterBPR, Compressor, Duct,
-    Nozzle, Burner, Turbine, Nozzle, Shaft, Nmech, FlowStationVar)
+from pycycle.api import (FlightConditions, Inlet, SplitterBPR, CompressorRline, Duct,
+    Burner, TurbinePRmap, NozzleConvergent, Shaft, Nmech, FlowStationVar)
 
 class Turbofan(Assembly): 
 	
@@ -21,7 +21,7 @@ class Turbofan(Assembly):
         inlet = self.add('inlet', Inlet() )
         inlet.ram_recovery = .995
         
-        fan = self.add('fan', Compressor())
+        fan = self.add('fan', CompressorRline())
         fan.eff = .867
         fan.PR = 1.645
         
@@ -31,21 +31,21 @@ class Turbofan(Assembly):
         bypduct = self.add( 'bypduct', Duct())
         bypduct.dPqP = .01
         
-        bypnoz = self.add( 'bypnoz', Nozzle())
+        bypnoz = self.add( 'bypnoz', NozzleConvergent())
         bypnoz.cfg = .9962
         self.connect('fc.Fl_O.Ps', 'bypnoz.PsExh')       
    
         duct1 = self.add( 'duct1', Duct())
         duct1.dPqP = .0025
                     
-        lpc = self.add( 'lpc', Compressor())
+        lpc = self.add( 'lpc', CompressorRline())
         lpc.eff = .868
         lpc.PR = 2.488       
         
         duct2 = self.add( 'duct2', Duct())
         duct2.dPqP = .0025
         
-        hpc = self.add( 'hpc', Compressor())
+        hpc = self.add( 'hpc', CompressorRline())
         hpc.eff = .865
         hpc.PR = 5.609 
         hpc.Wfrac1=.055
@@ -63,21 +63,21 @@ class Turbofan(Assembly):
         burner.dPqP = .055
         
         
-        hpt = self.add( 'hpt', Turbine())
+        hpt = self.add( 'hpt', TurbinePRmap())
         hpt.eff = .9133
         hpt.PR = 2.670
         
         duct3 = self.add( 'duct3', Duct())
         duct3.dPqP = .005
         
-        lpt = self.add( 'lpt', Turbine())
+        lpt = self.add( 'lpt', TurbinePRmap())
         lpt.eff = .9323
         lpt.PR = 4.886
         
         duct4 = self.add( 'duct4', Duct())
         duct4.dPqP = .01
         
-        prinoz = self.add( 'prinoz', Nozzle())
+        prinoz = self.add( 'prinoz', NozzleConvergent())
         prinoz.cfg = .9978
         self.connect('fc.Fl_O.Ps', 'prinoz.PsExh')    
         
@@ -110,11 +110,11 @@ class Turbofan(Assembly):
 
         self.connect( 'hpspeed.Nmech', ['hpshaft.Nmech','hpc.Nmech', 'hpt.Nmech'] )
         self.connect( 'lpspeed.Nmech', ['lpshaft.Nmech','fan.Nmech','lpc.Nmech', 'lpt.Nmech'] )
-        self.connect( 'hpc.pwr', 'hpshaft.trq1' )
-        self.connect( 'hpt.pwr', 'hpshaft.trq2' )       
-        self.connect( 'fan.pwr', 'lpshaft.trq1' )
-        self.connect( 'lpc.pwr', 'lpshaft.trq2' )
-        self.connect( 'lpt.pwr', 'lpshaft.trq3' )       
+        self.connect( 'hpc.trq', 'hpshaft.trq1' )
+        self.connect( 'hpt.trq', 'hpshaft.trq2' )       
+        self.connect( 'fan.trq', 'lpshaft.trq1' )
+        self.connect( 'lpc.trq', 'lpshaft.trq2' )
+        self.connect( 'lpt.trq', 'lpshaft.trq3' )       
         
         hpspeed.Nmech = 8000
         lpspeed.Nmech = 2000
@@ -149,12 +149,12 @@ TF1.run()
 
 #TF1.run()
 
-print 'torques'
+print 'high shaft torques'
 print TF1.hpshaft.trqNet
 print TF1.hpshaft.trq1
 print TF1.hpshaft.trq2
 
-print 'torques'
+print 'Low shaft torques'
 print TF1.lpshaft.trqNet
 print TF1.lpshaft.trq1
 print TF1.lpshaft.trq2
@@ -200,12 +200,21 @@ print TF1.hpc.Fl_O.Pt
 print TF1.hpc.Fl_O.Tt
 print TF1.hpc.Fl_O.W
 
+print TF1.hpc.Fl_bld1.Pt
+print TF1.hpc.Fl_bld1.Tt
+print TF1.hpc.Fl_bld1.W
+
+print TF1.hpc.Fl_bld2.Pt
+print TF1.hpc.Fl_bld2.Tt
+print TF1.hpc.Fl_bld2.W
+
 print 'burner'
 print TF1.burner.Fl_O.Pt
 print TF1.burner.Fl_O.Tt
 print TF1.burner.Fl_O.W  
 
 print 'hpt'
+print TF1.hpt.Fl_I.ht
 print TF1.hpt.Fl_O.Pt
 print TF1.hpt.Fl_O.Tt
 print TF1.hpt.Fl_O.W  
