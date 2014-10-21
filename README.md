@@ -23,10 +23,12 @@ but once you have homebrew installed and setup, here is the short version:
 
 
 ### Cantera
-In addition, this plugin requires [Cantera](https://code.google.com/p/cantera/) 
-and the python wrapper for it. You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
-or follow the instructions below for a bit easier route. 
+In addition, this plugin requires [Cantera](http://sourceforge.net/projects/cantera/files/cantera/2.0.2/cantera-2.0.2.tar.gz/download)
+and the python wrapper for it. Because of some backwards incompatible changes made to the most recent 
+versions of Cantera, you need to install version 2.0.2, and not the latest version. 
 
+You can [compile cantera from scratch](http://cantera.github.io/docs/sphinx/html/compiling.html), 
+or follow the instructions below for a bit easier route on windows. 
 
 
 #### Windows
@@ -40,10 +42,47 @@ release version of it!
 https://code.google.com/p/cantera/wiki/WindowsInstallation
 
 #### Mac OS-X
-Assuming you've used homebrew to get OpenMDAO setup, then just use it to install Cantera too! 
 
+You'll need to compile from source here. Unfortunately, installing Cantera on OS-X is a bit of a mess.  
+You can use homebrew to get some of the pre-requisites, but at least one of them needs to be downloaded manually first
 
-    brew install cantera
+first 
+    brew tap homebrew/science
+
+Next go to the [sundials page](http://computation.llnl.gov/casc/sundials/download/download.php) and download 
+sundials-2.5.0.tar.gz. You need to manually put the zip file you just downloaded in 
+
+    /Library/Caches/Homebrew/sundials-2.5.0.tar.gz
+
+Now you're ready to install the cantera pre-reqs: 
+
+    brew install sundials
+    brew install scons
+
+After that, go unzip the [Cantera source code](http://sourceforge.net/projects/cantera/files/cantera/2.0.2/cantera-2.0.2.tar.gz/download) code you downwloaded. GO into that folder and edit a file called cantera.conf with the following lines: 
+
+    CXX = 'llvm-g++'
+    CC = 'llvm-gcc'
+    python_package = 'full'
+    f90_interface = 'n'
+    cxx_flags = '-ftemplate-depth-128 -DGTEST_USE_OWN_TR1_TUPLE=1'
+
+Save that file, then run 
+    
+    scons build
+
+If that works, you'll see something like this in the terminal 
+
+    *******************************************************
+    Compilation completed successfully.
+
+    - To run the test suite, type 'scons test'.
+    - To install, type '[sudo] scons install'.
+    *******************************************************
+
+To finish the install, 
+   
+   scons install
 
 
 #### Linux
