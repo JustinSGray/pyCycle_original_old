@@ -14,12 +14,9 @@ but once you have homebrew installed and setup, here is the short version:
 
 
     brew install git
-    brew install python
-    brew install gfortran
-    pip install numpy
-    pip install scipy
-    brew install freetype
-    pip install matplotlib
+    brew tap Homebrew/python
+    brew install scipy
+    
 
 
 ### Cantera
