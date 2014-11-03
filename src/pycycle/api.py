@@ -7,3 +7,4 @@ from compressor import Compressor
 from heat_exchanger import HeatExchanger
 from cycle_component import CycleComponent
 from flowstation import FlowStation, FlowStationVar
+from thermal import CEA_tp
